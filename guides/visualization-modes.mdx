@@ -18,17 +18,17 @@ The toolbar at the top of every analysis contains the view mode selector:
 <CodeGroup>
 ```tsx View Mode Toolbar
 const viewModes = [
-  { id: 'balanced', label: 'Balanced', icon: ScaleBalanced },
-  { id: 'tree', label: 'Tree', icon: GitBranch },
-  { id: 'pillar', label: 'Pillar', icon: Columns },
+  { id: 'balanced', label: 'Balanced', icon: Columns },
+  { id: 'tree', label: 'Tree', icon: LayoutGrid },
+  { id: 'pillar', label: 'Pillar', icon: Rows3 },
   { id: 'circular', label: 'Circular', icon: CircleDot },
-  { id: 'flowchart', label: 'Flow', icon: Workflow },
-  { id: 'compass', label: 'Compass', icon: Compass },
+  { id: 'flowchart', label: 'Flow Map', icon: Share2 },
+  { id: 'compass', label: 'Compass', icon: Gauge },
 ];
 ```
 </CodeGroup>
 
-## Mode 1: Flow View
+## Mode 1: Flow Map
 
 Classical argument diagram with vertical logical progression.
 
@@ -60,7 +60,7 @@ Classical argument diagram with vertical logical progression.
   </Step>
 </Steps>
 
-### When to Use Flow View
+### When to Use Flow Map
 
 <Tabs>
   <Tab title="Best For">
@@ -396,7 +396,7 @@ Planned keyboard navigation:
 ## Choosing the Right Mode
 
 <Steps>
-  <Step title="Start with Flow">
+  <Step title="Start with Flow Map">
     Default view provides good overview for most topics
   </Step>
   
