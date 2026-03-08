@@ -1,0 +1,134 @@
+{
+  "projectType": "saas",
+  "projectName": "Argument Cartographer",
+  "projectDescription": "An AI-powered platform that maps, analyzes, and visualizes complex arguments and narratives using logical fallacy detection and real-time data.",
+  "theme": "aspen",
+  "primaryColor": "#8c9484",
+  "lightColor": "#1e1e1e",
+  "darkColor": "#e8e6d9",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "introduction",
+              "how-it-works",
+              "key-features"
+            ]
+          },
+          {
+            "group": "Getting Started",
+            "pages": [
+              "quickstart",
+              "installation",
+              "configuration"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/argument-mapping",
+              "features/fallacy-detection",
+              "features/narrative-radar",
+              "features/credibility-scoring",
+              "features/social-pulse"
+            ]
+          },
+          {
+            "group": "User Guide",
+            "pages": [
+              "guides/creating-analysis",
+              "guides/visualization-modes",
+              "guides/exporting-results",
+              "guides/using-radar"
+            ]
+          },
+          {
+            "group": "Architecture",
+            "pages": [
+              "architecture/overview",
+              "architecture/ai-orchestration",
+              "architecture/data-layer",
+              "architecture/external-integrations"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "AI Flows",
+            "pages": [
+              "api/flows/generate-blueprint",
+              "api/flows/identify-fallacies",
+              "api/flows/summarize-source",
+              "api/flows/explain-fallacy",
+              "api/flows/ask-more"
+            ]
+          },
+          {
+            "group": "Tools & Integrations",
+            "pages": [
+              "api/tools/web-search",
+              "api/tools/web-scraper",
+              "api/tools/twitter-search"
+            ]
+          },
+          {
+            "group": "Data Schemas",
+            "pages": [
+              "api/schemas/argument-node",
+              "api/schemas/blueprint-output",
+              "api/schemas/fallacy-detection"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Deployment",
+        "groups": [
+          {
+            "group": "Deployment Guide",
+            "pages": [
+              "deployment/vercel",
+              "deployment/environment-variables",
+              "deployment/firebase-setup"
+            ]
+          },
+          {
+            "group": "Troubleshooting",
+            "pages": [
+              "troubleshooting/common-issues",
+              "troubleshooting/api-errors",
+              "troubleshooting/performance"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive Argument Mapping with node-based visualization",
+    "Automated Logical Fallacy Detection and categorization",
+    "Real-time Narrative Radar for trending topics",
+    "Credibility Scoring based on evidence quality",
+    "Social Pulse integration with Twitter sentiment analysis",
+    "Multiple visualization modes (Flow, Tree, Compass, Circular)",
+    "AI-powered analysis using Google Gemini 1.5 Pro",
+    "Firebase authentication and data persistence"
+  ],
+  "publicApiSurface": [
+    "generateArgumentBlueprint(input: string): Promise<ArgumentBlueprint>",
+    "identifyLogicalFallacies(text: string): Promise<FallacyDetection[]>",
+    "summarizeSourceText(text: string): Promise<string>",
+    "explainLogicalFallacy(fallacyId: string): Promise<FallacyExplanation>",
+    "askMore(context: string, question: string): Promise<string>",
+    "webSearch(query: string): Promise<SearchResult[]>",
+    "webScraper(url: string): Promise<string>",
+    "twitterSearch(query: string): Promise<Tweet[]>"
+  ]
+}
