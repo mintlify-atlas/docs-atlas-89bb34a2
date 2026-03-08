@@ -1,0 +1,476 @@
+---
+title: Using Narrative Radar
+description: Master the Narrative Radar feature to explore pre-analyzed trending topics and stay informed on current debates
+---
+
+## Overview
+
+Narrative Radar is your gateway to understanding current debates without the wait time or API costs of custom analysis. This guide covers how to effectively browse, filter, and explore the curated feed of pre-analyzed topics.
+
+<Info>
+  All Radar topics are fully analyzed before publication - you get instant access to complete argument blueprints, fallacy detection, and social pulse data.
+</Info>
+
+## Accessing the Radar
+
+<Steps>
+  <Step title="Navigate to Radar">
+    Click **Narrative Radar** in the main navigation menu, or visit `/radar`
+  </Step>
+  
+  <Step title="Browse Feed">
+    Scroll through the grid of curated topic cards
+  </Step>
+  
+  <Step title="Apply Filters (Optional)">
+    Use category tags, credibility filters, or search to narrow results
+  </Step>
+  
+  <Step title="Select Topic">
+    Click any card to open the full analysis view
+  </Step>
+</Steps>
+
+## Understanding Topic Cards
+
+Each Radar topic is presented in a comprehensive card:
+
+### Card Anatomy
+
+<Tabs>
+  <Tab title="Visual Elements">
+    **Thumbnail Image**
+    - Representative photo for the topic
+    - Helps quick visual scanning
+    - Often news imagery related to debate
+    
+    **Title**
+    - Clear, neutral phrasing of the debate
+    - Typically phrased as question or "X vs Y"
+    - Examples:
+      - "Should AI-generated art be copyrightable?"
+      - "Universal Basic Income: Economic necessity or fiscal fantasy?"
+    
+    **Description**
+    - 1-2 sentence summary of the controversy
+    - Sets context without taking sides
+  </Tab>
+  
+  <Tab title="Metadata Badges">
+    **Category Tags**
+    - Color-coded labels (Politics, Technology, Science, etc.)
+    - Multiple tags possible per topic
+    - Clickable to filter feed
+    
+    **Credibility Score**
+    - Large prominent badge (1-10)
+    - Color-coded:
+      - Green (8-10): Strong
+      - Blue (6-7): Moderate
+      - Yellow (4-5): Weak
+      - Red (1-3): Very Weak
+    
+    **Freshness Indicator**
+    - "Updated 2 hours ago"
+    - "Last updated: Mar 8, 2024"
+    - Helps judge if analysis is current
+  </Tab>
+  
+  <Tab title="Metrics">
+    **Source Count**
+    - "8 sources analyzed"
+    - Indicates depth of research
+    - Higher = more comprehensive
+    
+    **Fallacy Count**
+    - "3 fallacies detected"
+    - Quick quality indicator
+    - Click topic to see details
+    
+    **Social Engagement**
+    - Tweet count or engagement indicator
+    - Shows public interest level
+  </Tab>
+</Tabs>
+
+## Filtering & Search
+
+### Category Filters
+
+Narrow topics by category:
+
+<CardGroup cols={2}>
+  <Card title="Politics" icon="landmark">
+    Electoral politics, policy debates, governance
+  </Card>
+  
+  <Card title="Technology" icon="microchip">
+    AI, privacy, social media, crypto
+  </Card>
+  
+  <Card title="Science" icon="flask">
+    Climate, medicine, research ethics
+  </Card>
+  
+  <Card title="Society" icon="users">
+    Social justice, education, culture
+  </Card>
+  
+  <Card title="Economics" icon="chart-line">
+    Fiscal policy, inequality, trade
+  </Card>
+  
+  <Card title="Ethics" icon="scale-balanced">
+    Bioethics, philosophy, morality
+  </Card>
+</CardGroup>
+
+**How to filter:**
+- Click category badge on any card
+- Use category dropdown in header
+- Multiple categories can be selected (OR logic)
+
+### Credibility Filter
+
+Show only high-quality analyses:
+
+<CodeGroup>
+```typescript Credibility Slider
+<Slider
+  min={1}
+  max={10}
+  value={[minCredibility]}
+  onValueChange={([value]) => setMinCredibility(value)}
+  label="Minimum Credibility Score"
+/>
+
+// Results automatically filter
+const filteredTopics = topics.filter(t => 
+  t.credibilityScore >= minCredibility
+);
+```
+</CodeGroup>
+
+**Use cases:**
+- Set to 7+ for research/academic work
+- Set to 5+ for general understanding
+- Leave at 1 to see everything (including weak arguments)
+
+### Sort Options
+
+<Tabs>
+  <Tab title="Newest First (Default)">
+    **Shows:** Most recently updated topics at top
+    
+    **Best for:** Staying current with breaking news and evolving debates
+    
+    **Logic:** `sort((a, b) => b.updatedAt - a.updatedAt)`
+  </Tab>
+  
+  <Tab title="Highest Credibility">
+    **Shows:** Best-sourced, most rigorous analyses first
+    
+    **Best for:** Research, academic use, fact-checking
+    
+    **Logic:** `sort((a, b) => b.credibilityScore - a.credibilityScore)`
+  </Tab>
+  
+  <Tab title="Most Engagement">
+    **Shows:** Topics with highest Twitter/social activity
+    
+    **Best for:** Understanding public discourse, viral debates
+    
+    **Logic:** `sort((a, b) => b.tweetCount - a.tweetCount)`
+  </Tab>
+</Tabs>
+
+### Text Search
+
+Search topics by keyword:
+
+<CodeGroup>
+```typescript Search Implementation
+const [searchQuery, setSearchQuery] = useState('');
+
+const searchResults = topics.filter(topic => 
+  topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  topic.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  topic.categories.some(c => c.toLowerCase().includes(searchQuery.toLowerCase()))
+);
+```
+</CodeGroup>
+
+**Tips:**
+- Search title, description, AND categories
+- Partial matches work ("climate" finds "climate change")
+- Not case-sensitive
+
+## Exploring a Topic
+
+### Opening Analysis
+
+Click any topic card to view full analysis:
+
+<Steps>
+  <Step title="Route to Detail Page">
+    Navigate to `/radar/{topicId}`
+  </Step>
+  
+  <Step title="Load Analysis Data">
+    System fetches pre-generated blueprint from Firestore
+  </Step>
+  
+  <Step title="Render Full UI">
+    Complete analysis view loads instantly (no wait time!)
+  </Step>
+</Steps>
+
+### Analysis Components
+
+Same rich interface as custom analyses:
+
+- **Visualization Modes:** All 6 modes available
+- **Fallacy Detection:** Expandable fallacy cards
+- **Social Pulse:** Twitter sentiment and top tweets
+- **Export Options:** PNG, SVG, JSON export
+- **Ask More:** AI chat about the topic
+
+<Note>
+  The only difference from custom analyses: Radar topics are read-only (you can't edit them), but you can export and create your own variations.
+</Note>
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Quick Current Events Briefing">
+    **Scenario:** You have 10 minutes to understand today's big debate
+    
+    **Workflow:**
+    1. Open Radar (sorted by Newest)
+    2. Scan top 3-4 topics
+    3. Click most relevant one
+    4. Read AI summary (30 seconds)
+    5. Check credibility score and source count
+    6. Scan fallacies for manipulation tactics
+    7. Read Social Pulse for public sentiment
+    
+    **Result:** Comprehensive understanding in minutes, not hours of research
+  </Accordion>
+  
+  <Accordion title="Classroom Discussion Prep">
+    **Scenario:** Teacher preparing debate activity for tomorrow
+    
+    **Workflow:**
+    1. Filter by category (e.g., "Society")
+    2. Sort by Highest Credibility (7+ scores)
+    3. Choose age-appropriate, engaging topic
+    4. Export visualization to PDF
+    5. Create handout with fallacy examples
+    6. Assign students to "For" and "Against" teams
+    
+    **Result:** Pre-researched, balanced debate materials in under 10 minutes
+  </Accordion>
+  
+  <Accordion title="Fact-Checking Family Dinner Arguments">
+    **Scenario:** Uncle claims "everyone agrees" about controversial policy
+    
+    **Workflow:**
+    1. Search Radar for policy name
+    2. Open analysis if available
+    3. Show uncle the Balanced View
+    4. Point to evidence on both sides
+    5. Share fallacies if uncle used any (gently!)
+    
+    **Result:** Civil, fact-based discussion instead of shouting match
+  </Accordion>
+  
+  <Accordion title="Research Starting Point">
+    **Scenario:** Journalist assigned story on unfamiliar topic
+    
+    **Workflow:**
+    1. Search Radar for topic
+    2. Review analysis blueprint to identify:
+       - Key stakeholders/perspectives
+       - Main arguments and counterarguments
+       - Gaps in existing coverage (questions without answers)
+    3. Follow source URLs to read full articles
+    4. Export JSON to extract source list
+    5. Use as foundation for deeper reporting
+    
+    **Result:** Rapid topic familiarization with built-in source list
+  </Accordion>
+</AccordionGroup>
+
+## Radar vs Custom Analysis
+
+When to use each:
+
+<Tabs>
+  <Tab title="Use Radar When...">
+    **Ideal for:**
+    - Topic is mainstream/newsworthy
+    - You want instant results
+    - You're browsing for interesting debates
+    - You want to conserve API credits
+    - You trust editorial curation
+    
+    **Advantages:**
+    - Zero wait time
+    - No API costs
+    - Quality-controlled
+    - Often higher credibility (more sources)
+  </Tab>
+  
+  <Tab title="Use Custom Analysis When...">
+    **Ideal for:**
+    - Niche/specialized topic not in Radar
+    - You have specific article URL to analyze
+    - You want to analyze your own text/argument
+    - Topic is too new for Radar (< 24 hours old)
+    - You disagree with Radar's framing
+    
+    **Advantages:**
+    - Complete control over input
+    - Can analyze any topic
+    - Personalized to your needs
+    - Saves to your private history
+  </Tab>
+</Tabs>
+
+## Staying Updated
+
+### Refresh Frequency
+
+<Tabs>
+  <Tab title="Breaking News Topics">
+    **Update frequency:** Every 2-6 hours
+    
+    **What changes:**
+    - New sources added to blueprint
+    - Social Pulse refreshed with latest tweets
+    - Fallacy detection re-run on new content
+    - Credibility score may change
+    
+    **Indicator:** "Updated 3 hours ago"
+  </Tab>
+  
+  <Tab title="Ongoing Debates">
+    **Update frequency:** Daily or weekly
+    
+    **What changes:**
+    - Weekly source refresh
+    - Monthly comprehensive re-analysis
+    - Less frequent social pulse updates
+    
+    **Indicator:** "Updated yesterday"
+  </Tab>
+  
+  <Tab title="Historical Archives">
+    **Update frequency:** Never (static)
+    
+    **What changes:** Nothing - preserved as-of analysis date
+    
+    **Indicator:** "As of [date]" or "Archived"
+  </Tab>
+</Tabs>
+
+### Notification System (Future)
+
+Planned features:
+
+<CardGroup cols={2}>
+  <Card title="Category Alerts" icon="bell">
+    Subscribe to categories, get notified of new topics
+  </Card>
+  
+  <Card title="Topic Updates" icon="refresh">
+    Follow specific topic, get notified when re-analyzed
+  </Card>
+  
+  <Card title="Custom Queries" icon="search">
+    Set keywords, get notified when matching topic appears
+  </Card>
+  
+  <Card title="Digest Email" icon="envelope">
+    Daily/weekly email with top topics
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<Steps>
+  <Step title="Start Broad, Then Filter">
+    Browse all topics first to see what's available, then apply filters
+  </Step>
+  
+  <Step title="Check Timestamp">
+    For time-sensitive topics, verify "Updated" time is recent
+  </Step>
+  
+  <Step title="Read the Summary First">
+    AI summary gives quick overview before diving into blueprint
+  </Step>
+  
+  <Step title="Cross-Reference Credibility">
+    Low score doesn't mean false - check why (few sources? fallacies?)
+  </Step>
+  
+  <Step title="Explore Multiple Views">
+    Switch visualization modes to see different angles
+  </Step>
+  
+  <Step title="Follow Source Links">
+    Click through to read original articles for full context
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="No Topics Found in Category">
+    **Cause:** That category doesn't have any curated topics yet
+    
+    **Solution:** 
+    - Try related categories
+    - Use custom analysis for that topic
+    - Check back later as feed grows
+  </Accordion>
+  
+  <Accordion title="Topic Won't Load">
+    **Cause:** Firestore connection issue or deleted topic
+    
+    **Solution:**
+    - Refresh page
+    - Try different topic
+    - Report issue if persists
+  </Accordion>
+  
+  <Accordion title="Outdated Information">
+    **Cause:** Topic hasn't been re-analyzed recently
+    
+    **Solution:**
+    - Check "Updated" timestamp
+    - Run custom analysis on same topic for fresh data
+    - Archived topics won't update
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Creating Custom Analysis" icon="plus" href="/guides/creating-analysis">
+    Learn when and how to create your own analyses
+  </Card>
+  
+  <Card title="Narrative Radar Feature" icon="radar" href="/features/narrative-radar">
+    Deep dive into how Radar topics are curated
+  </Card>
+  
+  <Card title="Credibility Scoring" icon="chart-line" href="/features/credibility-scoring">
+    Understand how topics are scored
+  </Card>
+  
+  <Card title="Social Pulse" icon="rss" href="/features/social-pulse">
+    Master the social sentiment analysis
+  </Card>
+</CardGroup>

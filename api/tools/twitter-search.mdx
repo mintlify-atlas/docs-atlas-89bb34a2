@@ -1,0 +1,252 @@
+---
+title: 'Twitter Search'
+description: 'Search X (Twitter) for recent tweets using the official API v2'
+icon: 'x-twitter'
+---
+
+## Overview
+
+The `twitterSearch` tool searches X (formerly Twitter) for recent, relevant public tweets using the official Twitter API v2. It returns tweets with full author information and engagement metrics.
+
+This tool powers the "Social Pulse" feature in Argument Cartographer.
+
+## Function Signature
+
+```typescript
+export const twitterSearch = ai.defineTool(
+  {
+    name: 'twitterSearch',
+    description: 'Searches X (formerly Twitter) for recent, relevant public tweets using a keyword query. Returns a list of tweets with author and metric details.',
+    inputSchema: TwitterSearchInputSchema,
+    outputSchema: TwitterSearchOutputSchema,
+  },
+  async (input) => { ... }
+)
+```
+
+**Source:** `src/ai/tools/twitter-search.ts:38`
+
+## Input Schema
+
+<ParamField path="query" type="string" required>
+  The search query for X/Twitter. Exclude hashtags or "from:" filters - just provide the keywords.
+</ParamField>
+
+### Input Type
+
+```typescript
+const TwitterSearchInputSchema = z.object({
+  query: z.string().describe('The search query for X/Twitter. Exclude hashtags or "from:" filters, just provide the keywords.'),
+});
+```
+
+## Output Schema
+
+<ResponseField name="tweets" type="Tweet[]" required>
+  An array of tweet objects with author information and engagement metrics.
+</ResponseField>
+
+### Tweet Object Structure
+
+<Expandable title="Tweet Schema">
+  <ResponseField name="id" type="string" required>
+    The unique ID of the tweet.
+  </ResponseField>
+
+  <ResponseField name="text" type="string" required>
+    The full text content of the tweet.
+  </ResponseField>
+
+  <ResponseField name="author" type="TweetAuthor" required>
+    Information about the tweet author.
+    
+    <Expandable title="Author Schema">
+      <ResponseField name="name" type="string" required>
+        The author's display name.
+      </ResponseField>
+
+      <ResponseField name="username" type="string" required>
+        The author's unique username/handle.
+      </ResponseField>
+
+      <ResponseField name="profile_image_url" type="string" required>
+        URL to the author's profile picture.
+      </ResponseField>
+    </Expandable>
+  </ResponseField>
+
+  <ResponseField name="created_at" type="string" required>
+    The date and time the tweet was created (ISO 8601 format).
+  </ResponseField>
+
+  <ResponseField name="public_metrics" type="PublicMetrics" required>
+    Engagement metrics for the tweet.
+    
+    <Expandable title="Metrics Schema">
+      <ResponseField name="retweet_count" type="number" required>
+        Number of retweets.
+      </ResponseField>
+
+      <ResponseField name="reply_count" type="number" required>
+        Number of replies.
+      </ResponseField>
+
+      <ResponseField name="like_count" type="number" required>
+        Number of likes.
+      </ResponseField>
+
+      <ResponseField name="impression_count" type="number" required>
+        Number of impressions (views).
+      </ResponseField>
+    </Expandable>
+  </ResponseField>
+</Expandable>
+
+### Output Type
+
+```typescript
+const TweetAuthorSchema = z.object({
+  name: z.string(),
+  username: z.string(),
+  profile_image_url: z.string().url(),
+});
+
+const PublicMetricsSchema = z.object({
+  retweet_count: z.number(),
+  reply_count: z.number(),
+  like_count: z.number(),
+  impression_count: z.number(),
+});
+
+const TweetResultSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  author: TweetAuthorSchema,
+  created_at: z.string(),
+  public_metrics: PublicMetricsSchema,
+});
+
+const TwitterSearchOutputSchema = z.array(TweetResultSchema);
+```
+
+## How It Works
+
+1. **Query Construction**: Adds filters for English language and excludes retweets
+2. **API Request**: Calls Twitter API v2 recent search endpoint
+3. **Expansions**: Requests full user objects and tweet metrics
+4. **Hydration**: Combines tweet data with author information
+5. **Sorting**: Results sorted by relevancy (Twitter's algorithm)
+6. **Return**: Returns up to 20 most relevant tweets
+
+## Example Usage
+
+### Standalone
+
+```typescript
+import { twitterSearch } from '@/ai/tools/twitter-search';
+
+const tweets = await twitterSearch({ 
+  query: 'climate change' 
+});
+
+console.log(`Found ${tweets.length} tweets`);
+
+tweets.forEach(tweet => {
+  console.log(`@${tweet.author.username}: ${tweet.text}`);
+  console.log(`Likes: ${tweet.public_metrics.like_count}`);
+});
+```
+
+### With AI Flow
+
+```typescript
+import { ai } from '@/ai/genkit';
+import { twitterSearch } from '@/ai/tools/twitter-search';
+
+const response = await ai.generate({
+  prompt: 'What are people saying about climate change on Twitter?',
+  tools: [twitterSearch],
+});
+```
+
+### In Blueprint Generation
+
+The tool is automatically used in the `generateArgumentBlueprint` flow:
+
+```typescript
+const twitterResult = await twitterSearch({ query: searchQuery });
+
+if (twitterResult && twitterResult.length > 0) {
+  const sortedTweets = twitterResult.sort(
+    (a, b) => b.public_metrics.like_count - a.public_metrics.like_count
+  );
+  tweets = sortedTweets;
+}
+```
+
+## Search Query Filters
+
+The tool automatically applies these filters:
+
+- `lang:en` - English language tweets only
+- `-is:retweet` - Excludes retweets, only original tweets
+
+**Constructed Query:**
+```
+{your_query} lang:en -is:retweet
+```
+
+## API Parameters
+
+- **max_results**: 20 tweets
+- **sort_order**: relevancy
+- **tweet.fields**: created_at, author_id, public_metrics
+- **expansions**: author_id
+- **user.fields**: profile_image_url, username, name
+
+## Environment Variables
+
+<ParamField path="TWITTER_BEARER_TOKEN" type="string" required>
+  Your Twitter API v2 Bearer Token. Get one from the [Twitter Developer Portal](https://developer.twitter.com/).
+</ParamField>
+
+```bash
+TWITTER_BEARER_TOKEN=your_bearer_token_here
+```
+
+## Error Handling
+
+- Returns empty array `[]` if no tweets found (not an error)
+- Throws error if API request fails
+- Provides fallback profile images for missing data
+- Logs errors to console for debugging
+
+## Rate Limits
+
+Twitter API v2 rate limits:
+
+- **App-level**: 450 requests per 15 minutes
+- **User-level**: 180 requests per 15 minutes
+
+The tool uses app-level authentication (Bearer Token).
+
+## Performance
+
+- Average response time: 1-2 seconds
+- Returns up to 20 tweets
+- Sorted by relevancy for best results
+- Includes full engagement metrics
+
+## Use Cases
+
+- **Social Pulse**: Gauge public sentiment on topics
+- **Trending Analysis**: See what people are discussing
+- **Evidence Gathering**: Find real-world examples and opinions
+- **Sentiment Analysis**: Analyze tone and perspective
+- **Debate Context**: Understand the broader conversation
+
+## Related
+
+- [Generate Blueprint Flow](/api/flows/generate-blueprint) - uses Twitter Search for Social Pulse
+- [Ask More Flow](/api/flows/ask-more) - can search Twitter for additional context
+- [Web Search Tool](/api/tools/web-search)

@@ -1,80 +1,489 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start Guide
+description: Get started with Argument Cartographer in 5 minutes - from account creation to your first analysis
 ---
 
-## Get started in three steps
+## Welcome!
 
-Get your documentation site running locally and make your first customization.
+This guide will walk you through creating your first argument analysis from start to finish. By the end, you'll have generated a complete logical blueprint with fallacy detection and social sentiment analysis.
 
-### Step 1: Set up your local environment
+<Info>
+  **Estimated time:** 5-10 minutes
+</Info>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- A modern web browser (Chrome, Firefox, Safari, or Edge)
+- An email address for account creation
+- A topic, URL, or text you want to analyze
+
+<Note>
+  No technical knowledge required - this is a fully web-based platform.
+</Note>
+
+## Step 1: Create Your Account
+
+First, you'll need to create a free account to access the platform.
+
+<Steps>
+  <Step title="Navigate to Sign Up">
+    Go to the Argument Cartographer homepage and click **Sign Up** in the top navigation.
+  </Step>
+  
+  <Step title="Enter Your Details">
+    Fill in the registration form:
+    - **Email address** - Your working email
+    - **Password** - At least 8 characters
+    - **Display name** - How you'll be identified (optional)
+  </Step>
+  
+  <Step title="Verify Email">
+    Check your inbox for a verification email and click the confirmation link.
+  </Step>
+  
+  <Step title="Complete Profile">
+    Return to the platform and you'll be automatically logged in.
+  </Step>
+</Steps>
+
+<Tip>
+  Use a strong, unique password. Your account will store all your analysis history.
+</Tip>
+
+## Step 2: Navigate to the Dashboard
+
+After logging in, you'll land on the **Dashboard** - your analysis command center.
+
+### Dashboard Layout
+
+The dashboard consists of:
+
+- **Analysis Input** - Large text area to submit topics, URLs, or text
+- **Recent Analyses** - Your analysis history
+- **Narrative Radar** - Trending pre-analyzed topics
+- **Quick Stats** - Your usage metrics
+
+<Card title="Dashboard Screenshot" icon="image">
+  The dashboard features a clean, focused interface with the analysis input front and center.
+</Card>
+
+## Step 3: Submit Your First Analysis
+
+Now for the exciting part - creating your first argument blueprint!
+
+### Choose Your Input Type
+
+<Tabs>
+  <Tab title="Topic Query">
+    Enter a controversial topic or question:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    **Good examples:**
+    - "Should artificial intelligence be regulated?"
+    - "Universal basic income pros and cons"
+    - "Climate change policy debates"
+    - "Cryptocurrency as legal tender"
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    **Tips:**
+    - Be specific but not too narrow
+    - Phrase as a question or statement
+    - Avoid yes/no questions when possible
+  </Tab>
+  
+  <Tab title="Article URL">
+    Paste a link to a news article, blog post, or opinion piece:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    **Supported sources:**
+    - News articles (BBC, Reuters, CNN, etc.)
+    - Blog posts and opinion pieces
+    - Academic articles (if publicly accessible)
+    - Government documents and reports
+    
+    **Example:**
+    ```
+    https://www.bbc.com/news/technology-67890123
+    ```
+  </Tab>
+  
+  <Tab title="Raw Text">
+    Paste the full text of an argument you want to analyze:
+    
+    **Best for:**
+    - Debate transcripts
+    - Academic essays
+    - Opinion pieces
+    - Social media threads
+    
+    **Paste directly into the input box** (up to 50,000 characters)
+  </Tab>
+</Tabs>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+### Submit for Analysis
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+<Steps>
+  <Step title="Enter Your Input">
+    Type or paste your topic, URL, or text into the main input box.
+  </Step>
+  
+  <Step title="Click Analyze">
+    Press the **"Generate Analysis"** button to start the AI processing.
+  </Step>
+  
+  <Step title="Watch the Progress">
+    You'll see real-time status updates:
+    - 🔍 Searching web sources...
+    - 📰 Scraping articles...
+    - 🐦 Fetching social sentiment...
+    - 🤖 Analyzing arguments...
+    - ⚠️ Detecting fallacies...
+    - ✅ Generating blueprint...
+  </Step>
+</Steps>
 
-### Step 3: Go live
+<Info>
+  Analysis typically takes **15-45 seconds** depending on topic complexity and source availability.
+</Info>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+## Step 4: Explore Your Analysis
 
-## Next steps
+Once processing completes, you'll see your comprehensive argument blueprint!
 
-Now that you have your docs running, explore these key features:
+### Analysis Overview
+
+The analysis view consists of three main sections:
+
+<CardGroup cols={3}>
+  <Card title="Summary Panel" icon="file-text">
+    High-level overview with:
+    - Neutral summary
+    - Credibility score (1-10)
+    - Key takeaways
+    - "Brutal honest take"
+  </Card>
+  
+  <Card title="Visualization Area" icon="diagram-project">
+    Interactive argument map with:
+    - 6 view modes
+    - Clickable nodes
+    - Export options
+    - Full-screen mode
+  </Card>
+  
+  <Card title="Social Pulse" icon="rss">
+    Twitter sentiment with:
+    - AI-generated summary
+    - Top 5 relevant tweets
+    - Engagement metrics
+  </Card>
+</CardGroup>
+
+### Understanding the Blueprint
+
+<Steps>
+  <Step title="Identify the Thesis">
+    The **central contention** appears at the top in most views. This is the main claim being debated.
+    
+    Example: *"Artificial intelligence should be regulated by government agencies"*
+  </Step>
+  
+  <Step title="Explore Claims (For)">
+    **Green/supporting nodes** represent arguments in favor of the thesis.
+    
+    Click any claim to see:
+    - Full text
+    - Source attribution
+    - Supporting evidence
+    - Detected fallacies
+  </Step>
+  
+  <Step title="Review Counterclaims (Against)">
+    **Red/opposing nodes** represent arguments against the thesis.
+    
+    These provide the counter-perspective and rebuttals.
+  </Step>
+  
+  <Step title="Examine Evidence">
+    **Evidence nodes** (smaller, attached to claims) contain:
+    - Primary source quotes
+    - Statistics and studies
+    - Expert opinions
+    - URL citations
+  </Step>
+</Steps>
+
+### Switch Visualization Modes
+
+Try different views to find what works best for your needs:
+
+<Tabs>
+  <Tab title="Flow View">
+    Classical argument structure - thesis flows down through reasons and objections to conclusion.
+    
+    **Best for:** Understanding logical progression
+  </Tab>
+  
+  <Tab title="Balanced View">
+    Split layout with "For" on left, "Against" on right.
+    
+    **Best for:** Comparing opposing arguments side-by-side
+  </Tab>
+  
+  <Tab title="Tree View">
+    Hierarchical tree showing parent-child relationships.
+    
+    **Best for:** Tracing argument lineage
+  </Tab>
+  
+  <Tab title="Compass View">
+    Circular layout with thesis at center, claims radiating out.
+    
+    **Best for:** Seeing the big picture at a glance
+  </Tab>
+  
+  <Tab title="Circular View">
+    3D flip cards in circular arrangement.
+    
+    **Best for:** Interactive exploration and presentations
+  </Tab>
+  
+  <Tab title="Pillar View">
+    Vertical columns for each side of the debate.
+    
+    **Best for:** Dense information display
+  </Tab>
+</Tabs>
+
+<Tip>
+  Use the **view mode selector** in the toolbar to switch between visualizations instantly.
+</Tip>
+
+## Step 5: Review Detected Fallacies
+
+Scroll down to the **Fallacy Detection** section to see logical errors identified in the source material.
+
+### Fallacy Card Breakdown
+
+Each fallacy is presented with:
+
+<Steps>
+  <Step title="Severity & Category">
+    - **Badge:** Critical (red), Major (orange), Minor (yellow)
+    - **Type:** Logical, Rhetorical, or Statistical
+  </Step>
+  
+  <Step title="Problematic Text">
+    The exact quote containing the fallacy, highlighted in context.
+  </Step>
+  
+  <Step title="Explanation">
+    Clear description of why this reasoning is flawed.
+  </Step>
+  
+  <Step title="Educational Content">
+    - Formal definition of the fallacy
+    - How to avoid it in your own arguments
+    - Example of the fallacy type
+  </Step>
+  
+  <Step title="Suggested Fix">
+    A logically sound rephrasing of the argument.
+  </Step>
+</Steps>
+
+<Note>
+  Click any fallacy card to expand and see full educational details.
+</Note>
+
+## Step 6: Check Social Pulse
+
+Open the **Social Pulse** panel (right sidebar) to see public discourse on the topic.
+
+### What You'll See
+
+1. **AI Summary** - Neutral synthesis of Twitter sentiment and key discussion points
+2. **Top Tweets** - 5 most relevant/engaging tweets sorted by likes
+3. **Author Info** - Profile pictures, names, and handles
+4. **Engagement** - Visual indicators for likes, retweets, replies
+
+<Tip>
+  The Social Pulse helps you understand how the public is actually discussing the topic, beyond formal news sources.
+</Tip>
+
+## Step 7: Export & Share
+
+Ready to share your findings? Use the export feature!
+
+<Steps>
+  <Step title="Open Export Modal">
+    Click the **Export** button in the toolbar (download icon).
+  </Step>
+  
+  <Step title="Choose Format">
+    Select your desired format:
+    - **PNG** - High-quality image (1x, 2x, or 3x resolution)
+    - **SVG** - Scalable vector graphic
+    - **JSON** - Raw data for developers
+  </Step>
+  
+  <Step title="Configure Options">
+    For PNG/SVG:
+    - Color mode (Light or Dark)
+    - Include background (Yes or No)
+    - Resolution (1x, 2x, 3x)
+  </Step>
+  
+  <Step title="Download or Share">
+    - **Download** to save to your device
+    - **Copy** to clipboard for quick pasting
+    - **Share** directly to X, LinkedIn, WhatsApp, or Telegram
+  </Step>
+</Steps>
+
+<CodeGroup>
+```json Example JSON Export
+{
+  "blueprint": [
+    {
+      "id": "thesis-1",
+      "type": "thesis",
+      "side": "for",
+      "content": "AI should be regulated...",
+      "source": "https://bbc.com/..."
+    }
+  ],
+  "credibilityScore": 7,
+  "fallacies": [...]
+}
+```
+</CodeGroup>
+
+## Step 8: Ask Follow-Up Questions
+
+Use the **Ask More** chat feature to dive deeper into the analysis.
+
+### How to Use Ask More
+
+<Steps>
+  <Step title="Open Chat Panel">
+    Click the **Ask More** button or chat icon in the toolbar.
+  </Step>
+  
+  <Step title="Type Your Question">
+    Ask anything about the analysis:
+    - "What's the strongest evidence against the thesis?"
+    - "Explain the straw man fallacy in claim 3"
+    - "Which sources are most credible?"
+  </Step>
+  
+  <Step title="Get AI Response">
+    Gemini analyzes your question in context of the full blueprint and provides an informed answer.
+  </Step>
+</Steps>
+
+<Tip>
+  Ask More has access to the entire blueprint, all sources, and detected fallacies - it can provide detailed, context-aware answers.
+</Tip>
+
+## Next Steps
+
+### Explore More Features
 
 <CardGroup cols={2}>
+  <Card title="Narrative Radar" icon="radar" href="/features/narrative-radar">
+    Browse pre-analyzed trending topics
+  </Card>
+  
+  <Card title="Visualization Modes" icon="eye" href="/guides/visualization-modes">
+    Master all 6 visualization options
+  </Card>
+  
+  <Card title="Fallacy Detection" icon="shield-check" href="/features/fallacy-detection">
+    Learn to identify logical fallacies
+  </Card>
+  
+  <Card title="Analysis History" icon="clock-rotate-left" href="/guides/creating-analysis">
+    Access and manage past analyses
+  </Card>
+</CardGroup>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+### Tips for Better Analyses
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+<AccordionGroup>
+  <Accordion title="Choose Controversial Topics">
+    The platform works best with topics that have genuine debate and multiple perspectives. Avoid one-sided issues.
+  </Accordion>
+  
+  <Accordion title="Be Specific">
+    "Should AI be regulated?" is better than just "AI". Specificity helps the system find more relevant sources.
+  </Accordion>
+  
+  <Accordion title="Check Multiple Views">
+    Different visualization modes highlight different aspects of arguments. Try them all!
+  </Accordion>
+  
+  <Accordion title="Read the Sources">
+    Click through to original sources to verify context and read full articles.
+  </Accordion>
+  
+  <Accordion title="Use Ask More Liberally">
+    The AI can clarify confusing claims, explain why something is a fallacy, or provide additional context.
+  </Accordion>
+</AccordionGroup>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+## Troubleshooting
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+<AccordionGroup>
+  <Accordion title="Analysis is Taking Too Long">
+    If analysis exceeds 60 seconds:
+    - Check your internet connection
+    - Try a simpler topic
+    - Refresh the page and try again
+    
+    If the issue persists, the API services may be experiencing high load.
+  </Accordion>
+  
+  <Accordion title="No Sources Found">
+    If the system can't find sources:
+    - Try rephrasing your topic with different keywords
+    - Ensure your topic is recent and newsworthy
+    - Check that it's a genuinely debated issue
+    
+    The system will fall back to AI knowledge with a disclaimer if external APIs fail.
+  </Accordion>
+  
+  <Accordion title="Fallacies Seem Wrong">
+    The AI is very sensitive and may occasionally:
+    - Flag rhetorical flourishes as fallacies
+    - Miss subtle logical errors
+    - Misclassify fallacy types
+    
+    Use the confidence score (0-100%) as a guide. Lower confidence means the AI is less certain.
+  </Accordion>
+  
+  <Accordion title="Export Not Working">
+    If export fails:
+    - Try a different format (PNG vs SVG)
+    - Reduce resolution (3x → 1x)
+    - Disable browser extensions that might interfere
+    - Use Download instead of Copy to Clipboard
+  </Accordion>
+</AccordionGroup>
 
+## Getting Help
+
+If you need assistance:
+
+<CardGroup cols={2}>
+  <Card title="Documentation" icon="book" href="/guides/creating-analysis">
+    Comprehensive user guides
+  </Card>
+  
+  <Card title="Common Issues" icon="circle-question" href="/troubleshooting/common-issues">
+    Troubleshooting reference
+  </Card>
 </CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Congratulations! You've completed your first analysis. Keep exploring and refining your critical thinking skills.
 </Note>

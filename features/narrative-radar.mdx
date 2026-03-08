@@ -1,0 +1,463 @@
+---
+title: Narrative Radar
+description: Real-time feed of curated, pre-analyzed trending topics with instant access to comprehensive argument blueprints
+---
+
+## Overview
+
+Narrative Radar is Argument Cartographer's "Head-Up Display" for the information ecosystem - a curated feed of high-impact, trending topics that have been pre-analyzed for logical integrity and public sentiment.
+
+<Info>
+  **Key Benefit:** Explore complex debates instantly without waiting for AI processing or consuming your API quota.
+</Info>
+
+<CardGroup cols={2}>
+  <Card title="Curated Topics" icon="rss">
+    Expert-selected controversial debates and breaking news
+  </Card>
+  <Card title="Pre-Generated" icon="bolt">
+    Analyses ready instantly - no wait time
+  </Card>
+  <Card title="Always Fresh" icon="clock-rotate-left">
+    Updated daily as news develops
+  </Card>
+  <Card title="Free Access" icon="unlock">
+    Available to all users without API costs
+  </Card>
+</CardGroup>
+
+## How Narrative Radar Works
+
+<Steps>
+  <Step title="Topic Curation">
+    Editorial team or automated algorithms identify trending topics based on:
+    - News velocity (rapid coverage growth)
+    - Social engagement (Twitter discussion volume)
+    - Public interest (search trends)
+    - Controversy level (polarized viewpoints)
+  </Step>
+  
+  <Step title="Pre-Analysis">
+    Before topics appear in Radar, they're fully analyzed:
+    - Web search across trusted sources
+    - Argument blueprint generation
+    - Fallacy detection
+    - Social pulse gathering
+    - Credibility scoring
+  </Step>
+  
+  <Step title="Publication">
+    Completed analyses are published to the Radar feed with metadata:
+    - Title and description
+    - Thumbnail image
+    - Credibility score preview
+    - Source count
+    - Last updated timestamp
+  </Step>
+  
+  <Step title="User Access">
+    Users browse the feed and click to explore full analysis
+  </Step>
+</Steps>
+
+## Radar Feed Interface
+
+The Radar page (`/radar`) displays a grid of topic cards:
+
+### Topic Card Components
+
+<Tabs>
+  <Tab title="Visual Elements">
+    - **Thumbnail** - Representative image for the topic
+    - **Title** - Clear, neutral phrasing of the debate
+    - **Description** - 1-2 sentence summary
+    - **Badges** - Category tags (Politics, Technology, Science, etc.)
+    - **Freshness Indicator** - "Updated 2 hours ago"
+  </Tab>
+  
+  <Tab title="Metrics">
+    - **Credibility Score** - Large numbered badge (1-10)
+    - **Source Count** - "8 sources analyzed"
+    - **Fallacy Count** - "3 fallacies detected"
+    - **Social Engagement** - Tweet count indicator
+  </Tab>
+  
+  <Tab title="Actions">
+    - **Click to Explore** - Opens full analysis view
+    - **Share** - Social sharing buttons
+    - **Bookmark** - Save for later (coming soon)
+  </Tab>
+</Tabs>
+
+<CodeGroup>
+```tsx Radar Card Component
+const RadarTopicCard = ({ topic }) => (
+  <Card className="radar-card hover:shadow-lg transition-shadow">
+    <CardImage src={topic.thumbnail} alt={topic.title} />
+    
+    <CardContent>
+      <div className="flex items-start justify-between">
+        <h3 className="font-bold text-lg">{topic.title}</h3>
+        <CredibilityBadge score={topic.credibilityScore} />
+      </div>
+      
+      <p className="text-muted-foreground">{topic.description}</p>
+      
+      <div className="flex gap-2 flex-wrap mt-2">
+        {topic.categories.map(cat => (
+          <Badge variant="secondary">{cat}</Badge>
+        ))}
+      </div>
+      
+      <div className="flex items-center gap-4 mt-4 text-sm">
+        <Metric icon="newspaper">{topic.sourceCount} sources</Metric>
+        <Metric icon="warning">{topic.fallacyCount} fallacies</Metric>
+        <Metric icon="clock">{formatRelativeTime(topic.updatedAt)}</Metric>
+      </div>
+    </CardContent>
+    
+    <CardFooter>
+      <Button asChild className="w-full">
+        <Link href={`/radar/${topic.id}`}>Explore Analysis</Link>
+      </Button>
+    </CardFooter>
+  </Card>
+);
+```
+</CodeGroup>
+
+## Topic Selection Criteria
+
+Not every news story makes it to the Radar. Topics are selected based on:
+
+### Controversy Level
+
+<Steps>
+  <Step title="Genuine Debate">
+    Topic must have legitimate arguments on multiple sides - not one-sided issues
+  </Step>
+  
+  <Step title="Polarization">
+    Significant public disagreement or partisan split
+  </Step>
+  
+  <Step title="Complexity">
+    Nuanced issue with multiple dimensions (economic, ethical, practical, etc.)
+  </Step>
+</Steps>
+
+### Public Impact
+
+- **Relevance:** Affects large populations
+- **Timeliness:** Currently in the news cycle
+- **Searchability:** People are actively seeking information
+
+### Source Availability
+
+- **Coverage Depth:** At least 8-10 quality sources available
+- **Diversity:** Sources span ideological spectrum
+- **Recency:** Fresh articles (< 30 days old for most topics)
+
+<Note>
+  **Example Good Topics:**
+  - "Should AI art be copyrightable?"
+  - "Universal Basic Income: Economic solution or fiscal disaster?"
+  - "COVID-19 vaccine mandates: Public health vs personal freedom"
+  
+  **Example Poor Topics:**
+  - "Is murder wrong?" (no genuine debate)
+  - "My neighbor's fence dispute" (not public interest)
+  - "The 2015 dress color debate" (trivial)
+</Note>
+
+## Categorization System
+
+Radar topics are tagged with multiple categories for easy filtering:
+
+<Tabs>
+  <Tab title="Politics">
+    - Electoral politics
+    - Policy debates
+    - Governance issues
+    - International relations
+  </Tab>
+  
+  <Tab title="Technology">
+    - AI ethics and regulation
+    - Privacy and surveillance
+    - Social media impact
+    - Cryptocurrency and blockchain
+  </Tab>
+  
+  <Tab title="Science">
+    - Climate change
+    - Medical controversies
+    - Space exploration
+    - Emerging technologies
+  </Tab>
+  
+  <Tab title="Society">
+    - Social justice issues
+    - Education policy
+    - Criminal justice reform
+    - Cultural debates
+  </Tab>
+  
+  <Tab title="Economics">
+    - Fiscal policy
+    - Inequality and taxation
+    - Labor rights
+    - Trade and globalization
+  </Tab>
+  
+  <Tab title="Ethics">
+    - Bioethics
+    - Animal rights
+    - Environmental ethics
+    - Professional ethics
+  </Tab>
+</Tabs>
+
+## Filtering & Search
+
+Users can filter the Radar feed:
+
+<CodeGroup>
+```tsx Radar Filters
+const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+const [minCredibility, setMinCredibility] = useState(0);
+const [sortBy, setSortBy] = useState<'newest' | 'credibility' | 'engagement'>('newest');
+
+const filteredTopics = topics
+  .filter(t => !selectedCategory || t.categories.includes(selectedCategory))
+  .filter(t => t.credibilityScore >= minCredibility)
+  .sort((a, b) => {
+    switch (sortBy) {
+      case 'newest': return b.updatedAt - a.updatedAt;
+      case 'credibility': return b.credibilityScore - a.credibilityScore;
+      case 'engagement': return b.tweetCount - a.tweetCount;
+    }
+  });
+```
+</CodeGroup>
+
+**Filter options:**
+- **Category** - Show only specific categories
+- **Credibility** - Minimum score threshold (1-10)
+- **Freshness** - Last 24h, Last week, Last month
+- **Sort** - Newest, Highest credibility, Most engagement
+
+## Update Frequency
+
+Radar topics are dynamic and evolve:
+
+<Tabs>
+  <Tab title="Breaking News">
+    **Update frequency:** Every 2-6 hours
+    
+    Fast-moving stories are re-analyzed as new sources emerge:
+    - New articles incorporated
+    - Social sentiment refreshed
+    - Fallacies re-evaluated
+    
+    Users see "Updated 2 hours ago" indicators
+  </Tab>
+  
+  <Tab title="Ongoing Debates">
+    **Update frequency:** Daily or weekly
+    
+    Long-running controversies get periodic refreshes:
+    - Weekly analysis updates
+    - Monthly comprehensive re-analysis
+    - Archived when no longer topical
+  </Tab>
+  
+  <Tab title="Historical Archives">
+    **Update frequency:** Static
+    
+    Past debates preserved as educational resources:
+    - "As of [date]" timestamp
+    - No further updates
+    - Accessible via search or category browse
+  </Tab>
+</Tabs>
+
+## Data Structure
+
+Radar topics are stored in Firestore:
+
+<CodeGroup>
+```typescript RadarTopic Schema
+interface RadarTopic {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  categories: string[];
+  
+  // Analysis data
+  blueprint: ArgumentNode[];
+  credibilityScore: number;
+  fallacies: DetectedFallacy[];
+  tweets: Tweet[];
+  socialPulse: string;
+  
+  // Metadata
+  sourceCount: number;
+  fallacyCount: number;
+  tweetCount: number;
+  
+  // Timestamps
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  
+  // Curation
+  curatedBy?: string; // Editor or "auto"
+  featured: boolean; // Show in hero section
+  archived: boolean; // Historical topic
+}
+```
+</CodeGroup>
+
+**Firestore path:** `/radarTopics/{topicId}`
+
+<Note>
+  Radar topics are **publicly readable** (unlike user analyses) to enable sharing and SEO.
+</Note>
+
+## Benefits for Users
+
+<CardGroup cols={2}>
+  <Card title="Zero Wait Time" icon="bolt">
+    Analyses load instantly - no 30-second processing delay
+  </Card>
+  
+  <Card title="API Credits Saved" icon="piggy-bank">
+    Exploring Radar doesn't consume your Firecrawl/Twitter quota
+  </Card>
+  
+  <Card title="Quality Curation" icon="star">
+    Editorial oversight ensures important, well-sourced topics
+  </Card>
+  
+  <Card title="Educational Value" icon="graduation-cap">
+    See how current events map to logical structures
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Breaking News Analysis">
+    When major news breaks, Radar provides instant logical breakdown before misinformation spreads.
+    
+    **Example:** Within hours of a policy announcement, users can explore:
+    - Official justifications
+    - Expert criticisms
+    - Historical precedents
+    - Potential fallacies in political rhetoric
+  </Accordion>
+  
+  <Accordion title="Classroom Education">
+    Teachers can assign Radar topics for critical thinking exercises:
+    - "Analyze the fallacies in this debate"
+    - "Compare the strength of evidence on each side"
+    - "Track how the narrative evolved over time"
+  </Accordion>
+  
+  <Accordion title="Research Starting Point">
+    Journalists and researchers use Radar as a launchpad:
+    - Identify key sources quickly
+    - See what questions haven't been answered
+    - Find gaps in existing coverage
+  </Accordion>
+  
+  <Accordion title="Personal Decision-Making">
+    Users facing important choices (voting, career, investments) can:
+    - See both sides of relevant debates
+    - Evaluate evidence quality
+    - Identify manipulative rhetoric
+  </Accordion>
+</AccordionGroup>
+
+## Curation Workflow
+
+For administrators managing Radar content:
+
+<Steps>
+  <Step title="Topic Selection">
+    Identify trending topics via:
+    - News aggregators (Google News, AllSides)
+    - Social listening (Twitter trending)
+    - User requests/votes
+  </Step>
+  
+  <Step title="Analysis Generation">
+    Run standard analysis flow programmatically:
+    ```bash
+    npm run generate-radar-topic "AI regulation debate"
+    ```
+  </Step>
+  
+  <Step title="Quality Review">
+    Human reviewer checks:
+    - Blueprint accuracy
+    - Fallacy detection validity
+    - Source diversity
+    - Neutrality of summary
+  </Step>
+  
+  <Step title="Metadata Addition">
+    Add:
+    - Thumbnail image
+    - Category tags
+    - Featured flag (if high priority)
+    - Description text
+  </Step>
+  
+  <Step title="Publication">
+    Publish to `/radarTopics` collection - appears in feed immediately
+  </Step>
+</Steps>
+
+## Future Enhancements
+
+Planned features for Narrative Radar:
+
+<CardGroup cols={2}>
+  <Card title="User Voting" icon="thumbs-up">
+    Community votes to prioritize which topics get analyzed next
+  </Card>
+  
+  <Card title="Custom Alerts" icon="bell">
+    Subscribe to categories and get notified of new analyses
+  </Card>
+  
+  <Card title="Comparative Timeline" icon="timeline">
+    See how arguments evolved as events unfolded
+  </Card>
+  
+  <Card title="Debate Forecasting" icon="crystal-ball">
+    Predict which narratives will gain traction based on patterns
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Using the Radar" icon="radar" href="/guides/using-radar">
+    Detailed guide to exploring Radar topics
+  </Card>
+  
+  <Card title="Social Pulse" icon="rss" href="/features/social-pulse">
+    Understand Twitter sentiment integration
+  </Card>
+  
+  <Card title="Credibility Scoring" icon="chart-line" href="/features/credibility-scoring">
+    Learn how topics are scored
+  </Card>
+  
+  <Card title="Creating Analyses" icon="plus" href="/guides/creating-analysis">
+    Create your own custom analyses
+  </Card>
+</CardGroup>

@@ -1,0 +1,510 @@
+---
+title: 'Common Issues'
+description: 'Troubleshoot common deployment and runtime issues in Argument Cartographer'
+icon: 'triangle-exclamation'
+---
+
+## Build Failures
+
+### TypeScript Errors During Build
+
+**Symptom**: Build fails with TypeScript errors despite `ignoreBuildErrors: true`.
+
+**Cause**: While the Next.js config ignores build errors, Vercel may still fail if there are critical type issues.
+
+<AccordionGroup>
+  <Accordion title="Solution: Run Type Check Locally">
+    ```bash
+    npm run typecheck
+    ```
+    
+    This runs `tsc --noEmit` to check for type errors without emitting files.
+    
+    Fix any critical errors, especially:
+    - Missing return types in API routes
+    - Incorrect prop types in components
+    - Invalid module imports
+  </Accordion>
+  
+  <Accordion title="Solution: Check Next.js Config">
+    Verify your `next.config.ts` includes:
+    
+    ```typescript next.config.ts
+    const nextConfig: NextConfig = {
+      typescript: {
+        ignoreBuildErrors: true,
+      },
+      eslint: {
+        ignoreDuringBuilds: true,
+      },
+    };
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Dependency Installation Failures
+
+**Symptom**: `npm install` fails during Vercel deployment.
+
+**Common causes**:
+
+<CodeGroup>
+```bash Package Lock Mismatch
+# Delete and regenerate package-lock.json
+rm package-lock.json
+npm install
+git add package-lock.json
+git commit -m "Regenerate package-lock.json"
+git push
+```
+
+```bash Node Version Mismatch
+# Specify Node version in package.json
+{
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+```
+</CodeGroup>
+
+<Note>
+  Argument Cartographer requires Node.js 18+ due to Next.js 15 and modern ES modules.
+</Note>
+
+### Build Timeout on Vercel
+
+**Symptom**: Build exceeds Vercel's time limit (45 minutes on Hobby, configurable on Pro).
+
+**Solutions**:
+
+1. **Optimize build process**:
+   ```bash package.json
+   "scripts": {
+     "build": "NODE_ENV=production next build"
+   }
+   ```
+
+2. **Check for slow dependencies**:
+   ```bash
+   npm install --timing
+   ```
+
+3. **Upgrade to Vercel Pro** if your project legitimately requires longer build times.
+
+## Authentication Issues
+
+### Firebase Authentication Not Initializing
+
+**Symptom**: Users can't sign in, or see "Firebase not initialized" errors.
+
+<Steps>
+  <Step title="Verify Environment Variables">
+    Check all `NEXT_PUBLIC_FIREBASE_*` variables are set in Vercel:
+    
+    ```bash
+    # Required variables:
+    NEXT_PUBLIC_FIREBASE_API_KEY
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    NEXT_PUBLIC_FIREBASE_APP_ID
+    ```
+    
+    <Warning>
+      Variables without `NEXT_PUBLIC_` prefix are not accessible in client-side code.
+    </Warning>
+  </Step>
+
+  <Step title="Check Authorized Domains">
+    In Firebase Console:
+    1. Go to **Authentication** → **Settings** → **Authorized domains**
+    2. Add your Vercel domain (e.g., `your-app.vercel.app`)
+    3. Add custom domain if applicable
+  </Step>
+
+  <Step title="Verify Firebase Config Format">
+    The config must match Firebase Console exactly:
+    
+    ```typescript src/firebase/config.ts
+    export const firebaseConfig = {
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+      apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    };
+    ```
+  </Step>
+</Steps>
+
+### Permission Denied Errors
+
+**Symptom**: `Missing or insufficient permissions` when accessing Firestore.
+
+**The application implements strict security rules**. The custom error handler provides detailed debugging:
+
+```typescript
+// Error includes full request context
+FirestorePermissionError: Missing or insufficient permissions
+{
+  "auth": {
+    "uid": "user123",
+    "token": {...}
+  },
+  "method": "get",
+  "path": "/databases/(default)/documents/users/user456/argumentMaps/map1"
+}
+```
+
+<AccordionGroup>
+  <Accordion title="User ID Mismatch" icon="user-xmark">
+    **Problem**: User trying to access another user's data.
+    
+    In the example above, `auth.uid` is `user123` but the path contains `user456`.
+    
+    **Solution**: Ensure all Firestore paths use the authenticated user's UID:
+    
+    ```typescript
+    // ✅ Correct
+    const userId = auth.currentUser?.uid;
+    const docRef = doc(db, `users/${userId}/argumentMaps/${mapId}`);
+    
+    // ❌ Incorrect
+    const docRef = doc(db, `users/hardcoded-id/argumentMaps/${mapId}`);
+    ```
+  </Accordion>
+  
+  <Accordion title="Missing userId Field" icon="database">
+    **Problem**: Document doesn't have required `userId` field on creation.
+    
+    Security rules validate:
+    ```javascript
+    function isCreatingOwnSubcollectionDoc(userId) {
+      return request.resource.data.userId == userId;
+    }
+    ```
+    
+    **Solution**: Include `userId` in all documents:
+    
+    ```typescript
+    await setDoc(docRef, {
+      userId: auth.currentUser.uid,  // Required!
+      // ... other fields
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Not Authenticated" icon="lock">
+    **Problem**: User is not signed in.
+    
+    The error will show `"auth": null`.
+    
+    **Solution**: Ensure user is authenticated before accessing Firestore:
+    
+    ```typescript
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      // Redirect to login or show sign-in prompt
+      throw new Error('User must be authenticated');
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## API Integration Issues
+
+### Firecrawl API Failures
+
+**Symptom**: Analysis fails with "Firecrawl API key not configured" or "Web Search failed".
+
+<Steps>
+  <Step title="Verify API Key">
+    Check the environment variable:
+    
+    ```bash
+    # Must not be placeholder
+    FIRECRAWL_API_KEY=fc-your-actual-key-here
+    ```
+    
+    The application validates:
+    ```typescript
+    if (!firecrawlKey || firecrawlKey === 'YOUR_API_KEY_HERE') {
+      throw new Error('Firecrawl API key not configured');
+    }
+    ```
+  </Step>
+
+  <Step title="Check API Credits">
+    Firecrawl has usage limits. Log in to [Firecrawl Dashboard](https://firecrawl.dev/dashboard) to check:
+    - Remaining credits
+    - Rate limit status
+    - Recent API calls
+  </Step>
+
+  <Step title="Monitor Fallback Behavior">
+    The application has built-in fallbacks when Firecrawl fails:
+    
+    ```typescript
+    // From generate-argument-blueprint.ts
+    if (scrapedDocs.length > 0) {
+      // Use scraped content
+    } else if (searchResults.length > 0) {
+      // Fallback 1: Use search snippets
+      console.warn("Scraping failed. Using search snippets.");
+    } else {
+      // Fallback 2: Limited analysis mode
+      console.warn("No external sources available (API credits may be depleted).");
+      isLimitedAnalysis = true;
+    }
+    ```
+    
+    Check Vercel logs for these warnings to understand which fallback was triggered.
+  </Step>
+</Steps>
+
+### Twitter API Errors
+
+**Symptom**: Social Pulse feature returns empty or fails with 401/403 errors.
+
+<AccordionGroup>
+  <Accordion title="Invalid Bearer Token" icon="key">
+    **Error**: `Twitter API request failed with status 401`
+    
+    **Solution**:
+    1. Verify token in [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
+    2. Regenerate bearer token if expired
+    3. Update `TWITTER_BEARER_TOKEN` in Vercel environment variables
+    4. Redeploy application
+  </Accordion>
+  
+  <Accordion title="Rate Limit Exceeded" icon="clock">
+    **Error**: `Twitter API request failed with status 429`
+    
+    **Twitter API v2 rate limits**:
+    - Basic tier: 500,000 tweets/month
+    - Search endpoint: 180 requests per 15 minutes
+    
+    **Solution**:
+    - Wait for rate limit reset (check `x-rate-limit-reset` header)
+    - Upgrade Twitter API tier
+    - Implement caching for frequently searched topics
+  </Accordion>
+  
+  <Accordion title="Non-Fatal Failures" icon="info-circle">
+    Twitter failures are **non-fatal** by design:
+    
+    ```typescript
+    try {
+      const twitterResult = await twitterSearch({ query: searchQuery });
+      // Process tweets...
+    } catch (error: any) {
+      console.error("Twitter search failed, continuing. Error:", error.message);
+      // Application continues without social pulse data
+    }
+    ```
+    
+    The analysis completes successfully with empty `tweets` array and no `socialPulse` summary.
+  </Accordion>
+</AccordionGroup>
+
+### Google Gemini API Issues
+
+**Symptom**: Analysis fails with "AI failed to generate" errors.
+
+<Steps>
+  <Step title="Verify API Key">
+    ```bash
+    GOOGLE_GENAI_API_KEY=AIzaSy...
+    ```
+    
+    Get your key from [Google AI Studio](https://makersuite.google.com/app/apikey).
+  </Step>
+
+  <Step title="Check API Quotas">
+    Gemini API has rate limits:
+    - Free tier: 15 requests per minute
+    - Paid tier: Higher limits based on plan
+    
+    Monitor usage in Google Cloud Console.
+  </Step>
+
+  <Step title="Review Error Messages">
+    Common errors:
+    
+    **Safety filters triggered**:
+    ```
+    The AI model refused to respond due to safety filters.
+    ```
+    Solution: Rephrase input query to avoid triggering content filters.
+    
+    **Token limit exceeded**:
+    ```
+    Input tokens exceed maximum context length.
+    ```
+    Solution: The app limits scraped content to 20,000 chars per source. If still failing, reduce number of sources.
+  </Step>
+</Steps>
+
+## Runtime Errors
+
+### JSON Parsing Failures
+
+**Symptom**: "Failed to parse JSON from AI response" errors.
+
+**The application uses JSON5 for lenient parsing**, but AI responses sometimes have malformed JSON.
+
+<AccordionGroup>
+  <Accordion title="Diagnosis" icon="magnifying-glass">
+    Check Vercel logs for:
+    ```
+    Failed to parse JSON from AI response. Raw Text: {...}
+    ```
+    
+    This logs the actual AI response for debugging.
+  </Accordion>
+  
+  <Accordion title="Common Causes" icon="list">
+    1. **AI returned text instead of JSON**:
+       - AI didn't wrap response in \`\`\`json code block
+       - Response is markdown or natural language
+    
+    2. **Malformed JSON**:
+       - Trailing commas
+       - Single quotes instead of double quotes
+       - Unescaped special characters
+    
+    3. **Response truncated**:
+       - AI hit token limit mid-response
+       - Network error during streaming
+  </Accordion>
+  
+  <Accordion title="Recovery Strategy" icon="shield">
+    The app attempts multiple parsing strategies:
+    
+    ```typescript
+    // 1. Try to extract JSON from code block
+    const jsonBlockMatch = rawText.match(/```json\n([\s\S]*?)\n```/);
+    
+    // 2. Fallback: Find first { to last }
+    const firstBrace = rawText.indexOf('{');
+    const lastBrace = rawText.lastIndexOf('}');
+    jsonString = rawText.substring(firstBrace, lastBrace + 1);
+    
+    // 3. Use JSON5 for lenient parsing
+    coreAnalysis = JSON5.parse(jsonString);
+    ```
+    
+    If all fail, the error is thrown with the raw text for debugging.
+  </Accordion>
+</AccordionGroup>
+
+### Missing or Invalid Credibility Score
+
+**Symptom**: Credibility score is 0, NaN, or outside 1-10 range.
+
+**The application automatically fixes this**:
+
+```typescript
+// From generate-argument-blueprint.ts:299-309
+if (typeof coreAnalysis.credibilityScore === 'number') {
+  if (coreAnalysis.credibilityScore < 1) {
+    // AI returned decimal (e.g., 0.9), convert to 1-10 scale
+    coreAnalysis.credibilityScore = Math.round(coreAnalysis.credibilityScore * 10);
+  }
+  // Clamp to valid range
+  coreAnalysis.credibilityScore = Math.max(1, Math.min(10, Math.round(coreAnalysis.credibilityScore)));
+} else {
+  coreAnalysis.credibilityScore = 5; // Default fallback
+}
+```
+
+If you still see invalid scores, the AI response may not include a `credibilityScore` field at all.
+
+### Null Source URIs
+
+**Symptom**: Argument nodes have `source: "null"` instead of valid URLs.
+
+**Automatic fix applied**:
+
+```typescript
+// From generate-argument-blueprint.ts:312-322
+coreAnalysis.blueprint = coreAnalysis.blueprint.map((node: any) => {
+  if (!node.source || node.source === 'null' || node.source.toLowerCase() === 'null') {
+    node.source = 'https://user-input.local/query'; // Placeholder
+  }
+  if (!node.parentId || node.parentId === 'null') {
+    node.parentId = null;
+  }
+  return node;
+});
+```
+
+This ensures Zod validation passes for thesis nodes that don't have external sources.
+
+## Performance Issues
+
+See the dedicated [Performance Troubleshooting](/troubleshooting/performance) guide for:
+- Slow analysis generation
+- High API costs
+- Firestore optimization
+- Caching strategies
+
+## Getting Help
+
+<Steps>
+  <Step title="Check Vercel Logs">
+    **Vercel Dashboard** → **Deployments** → Select deployment → **Function logs**
+    
+    Look for:
+    - Error stack traces
+    - Console warnings
+    - Performance metrics
+  </Step>
+
+  <Step title="Enable Debug Logging">
+    The application includes extensive console logging:
+    
+    ```typescript
+    console.log(`[Flow] Generated Query: "${searchQuery}"`);
+    console.log(`[WebSearch] Found ${results.length} results`);
+    console.log(`[BatchScrape] COMPLETED: ${results.length}/${urls.length}`);
+    ```
+    
+    These help trace the exact point of failure.
+  </Step>
+
+  <Step title="Test Locally">
+    Reproduce the issue locally:
+    
+    ```bash
+    npm run dev
+    ```
+    
+    Check terminal output for detailed error messages not visible in production.
+  </Step>
+
+  <Step title="Review Firebase Rules">
+    Test security rules in Firebase Console:
+    
+    **Firestore Database** → **Rules** → **Rules Playground**
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Errors" icon="bug" href="/troubleshooting/api-errors">
+    Detailed API error troubleshooting
+  </Card>
+  <Card title="Performance" icon="gauge" href="/troubleshooting/performance">
+    Optimize application performance
+  </Card>
+  <Card title="Environment Variables" icon="key" href="/deployment/environment-variables">
+    Review configuration requirements
+  </Card>
+  <Card title="Firebase Setup" icon="fire" href="/deployment/firebase-setup">
+    Verify Firebase configuration
+  </Card>
+</CardGroup>

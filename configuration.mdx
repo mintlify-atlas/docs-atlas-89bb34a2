@@ -1,0 +1,480 @@
+---
+title: Configuration
+description: Customize Argument Cartographer settings, features, and behavior
+---
+
+## Overview
+
+Argument Cartographer is highly configurable through environment variables, Firebase settings, and code-level customization. This guide covers all configuration options.
+
+## Environment Variables
+
+All environment variables are stored in the `.env` file at the project root.
+
+### AI & Model Configuration
+
+<ParamField path="GOOGLE_GENAI_API_KEY" type="string" required>
+  Google Gemini API key for AI-powered analysis.
+  
+  **Default model:** `gemini-1.5-pro-latest`
+  
+  **How to change model:**
+  Edit `src/ai/genkit.ts`:
+  ```typescript
+  const ai = genkit({
+    plugins: [
+      googleAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY }),
+    ],
+    model: 'gemini-1.5-flash', // Faster, cheaper alternative
+  });
+  ```
+</ParamField>
+
+<Tip>
+  **Model Options:**
+  - `gemini-1.5-pro` - Best quality, slower, higher cost
+  - `gemini-1.5-flash` - Faster responses, lower cost, good quality
+  - `gemini-1.0-pro` - Legacy model, not recommended
+</Tip>
+
+### Web Search Configuration
+
+<ParamField path="FIRECRAWL_API_KEY" type="string" required>
+  Firecrawl API key for web search and scraping.
+  
+  **Rate limits:**
+  - Free tier: 500 requests/month
+  - Pro tier: 10,000 requests/month
+  
+  **Customize trusted sources:**
+  Edit `src/ai/tools/web-search.ts`:
+  ```typescript
+  const TRUSTED_NEWS_OUTLETS = [
+    "bbc.com",
+    "reuters.com",
+    "your-custom-source.com", // Add your sources
+  ];
+  ```
+</ParamField>
+
+<Note>
+  The system prioritizes trusted outlets but will fall back to general search if few results are found.
+</Note>
+
+### Social Media Integration
+
+<ParamField path="TWITTER_BEARER_TOKEN" type="string" required>
+  Twitter API v2 Bearer Token for social sentiment analysis.
+  
+  **Rate limits:**
+  - Essential tier (free): 500,000 tweets/month
+  - Elevated tier: Higher limits with approval
+  
+  **Disable Twitter integration:**
+  Set to empty string or remove from .env to skip social pulse.
+</ParamField>
+
+### Firebase Configuration
+
+#### Client SDK (Public)
+
+These variables are prefixed with `NEXT_PUBLIC_` and exposed to the browser:
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_API_KEY" type="string" required>
+  Firebase Web API key - safe to expose publicly
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN" type="string" required>
+  Firebase Auth domain (e.g., `myproject.firebaseapp.com`)
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_PROJECT_ID" type="string" required>
+  Firebase project ID
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET" type="string" required>
+  Firebase Storage bucket (e.g., `myproject.appspot.com`)
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID" type="string" required>
+  Firebase Cloud Messaging sender ID
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_APP_ID" type="string" required>
+  Firebase App ID (format: `1:123:web:abc`)
+</ParamField>
+
+#### Admin SDK (Server-Side)
+
+These variables are server-only and never exposed to the client:
+
+<ParamField path="SERVICE_ACCOUNT_PROJECT_ID" type="string" required>
+  Firebase project ID for Admin SDK
+</ParamField>
+
+<ParamField path="SERVICE_ACCOUNT_CLIENT_EMAIL" type="string" required>
+  Service account email (format: `firebase-adminsdk-xxxxx@project.iam.gserviceaccount.com`)
+</ParamField>
+
+<ParamField path="SERVICE_ACCOUNT_PRIVATE_KEY" type="string" required>
+  Service account private key (must include `\n` characters)
+  
+  **Format:**
+  ```env
+  SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQI...\n-----END PRIVATE KEY-----\n"
+  ```
+</ParamField>
+
+<Warning>
+  Never commit `.env` to version control! Add it to `.gitignore`.
+</Warning>
+
+## Application Settings
+
+### Analysis Limits
+
+Configure analysis behavior in `src/ai/flows/generate-argument-blueprint.ts`:
+
+<CodeGroup>
+```typescript Analysis Configuration
+// Maximum sources to scrape
+if (urlsToScrape.length >= 8) break; // Change to 5 or 15
+
+// Context size per source
+const content = doc.content.substring(0, 12000); // Adjust token limit
+
+// Twitter results count
+'max_results': '20', // Change to 10 or 50
+```
+</CodeGroup>
+
+### Credibility Scoring
+
+Customize the credibility algorithm in the main analysis prompt:
+
+<CodeGroup>
+```typescript Scoring Weights
+// In mainAnalysisPrompt system message:
+const scoringGuidelines = `
+Credibility Score (1-10):
+- 8+ diverse sources: +3 points
+- Strong primary evidence: +3 points  
+- No fallacies: 0 penalty
+- Critical fallacies: -3 points
+`;
+```
+</CodeGroup>
+
+### Fallacy Detection Sensitivity
+
+Adjust fallacy detection strictness:
+
+<CodeGroup>
+```typescript Fallacy Confidence
+// Filter low-confidence detections
+const highConfidenceFallacies = fallacies.filter(
+  f => f.confidence > 0.7 // Raise to 0.8 for stricter filtering
+);
+```
+</CodeGroup>
+
+## UI Customization
+
+### Theme & Branding
+
+Tailwind configuration in `tailwind.config.ts`:
+
+<CodeGroup>
+```typescript tailwind.config.ts
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        // Customize brand colors
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        // Add custom colors
+        brand: {
+          blue: '#0066CC',
+          green: '#00AA66',
+        },
+      },
+      fontFamily: {
+        // Change fonts
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Merriweather', 'Georgia', 'serif'],
+        mono: ['Fira Code', 'monospace'],
+      },
+    },
+  },
+};
+```
+</CodeGroup>
+
+### Default Visualization Mode
+
+Change default view in `src/components/analysis/AnalysisView.tsx`:
+
+<CodeGroup>
+```typescript Default View Mode
+const [viewMode, setViewMode] = useState<VisualizationMode>(
+  'flowchart' // Change to 'tree', 'compass', 'circular', etc.
+);
+```
+</CodeGroup>
+
+### Export Defaults
+
+Configure export settings in `src/components/analysis/ExportModal.tsx`:
+
+<CodeGroup>
+```typescript Export Defaults
+const [format, setFormat] = useState<ExportFormat>('PNG'); // or 'SVG', 'JSON'
+const [resolution, setResolution] = useState<Resolution>('2x'); // or '1x', '3x'
+const [includeBackground, setIncludeBackground] = useState(true);
+```
+</CodeGroup>
+
+## Firestore Data Structure
+
+Customize how data is stored in Firebase:
+
+### Collections
+
+```
+/users/{userId}
+  - id: string
+  - email: string
+  - displayName: string
+  - createdAt: timestamp
+  
+  /argumentMaps/{mapId}
+    - id: string
+    - userId: string
+    - input: string
+    - blueprint: ArgumentNode[]
+    - credibilityScore: number
+    - fallacies: DetectedFallacy[]
+    - tweets: Tweet[]
+    - createdAt: timestamp
+  
+  /sources/{sourceId}
+    - id: string
+    - userId: string
+    - url: string
+    - content: string
+    - scrapedAt: timestamp
+```
+
+### Security Rules Customization
+
+Edit `firestore.rules` to add custom access patterns:
+
+<CodeGroup>
+```javascript Custom Rules
+// Allow public read access to specific analyses
+match /users/{userId}/argumentMaps/{mapId} {
+  allow read: if resource.data.isPublic == true;
+  allow write: if isOwner(userId);
+}
+
+// Add team/org access
+match /orgs/{orgId}/analyses/{analysisId} {
+  allow read: if request.auth.uid in resource.data.members;
+  allow write: if request.auth.uid == resource.data.owner;
+}
+```
+</CodeGroup>
+
+## Performance Optimization
+
+### Caching Strategy
+
+Implement caching to reduce API calls:
+
+<CodeGroup>
+```typescript Source Caching
+// Cache scraped sources in Firestore
+const cachedSource = await getDoc(
+  doc(db, `users/${userId}/sources`, sourceId)
+);
+
+if (cachedSource.exists() && isRecent(cachedSource.data().scrapedAt)) {
+  return cachedSource.data().content;
+}
+
+// Otherwise scrape and cache
+const content = await scrapeUrl(url);
+await setDoc(doc(db, `users/${userId}/sources`, sourceId), {
+  url,
+  content,
+  scrapedAt: serverTimestamp(),
+});
+```
+</CodeGroup>
+
+### Streaming Responses
+
+Enable streaming for faster perceived performance:
+
+<CodeGroup>
+```typescript Streaming Setup
+const stream = ai.generateStream({
+  prompt: analysisPrompt,
+  onChunk: (chunk) => {
+    // Send partial results to client
+    sendUpdate({ status: 'processing', chunk });
+  },
+});
+```
+</CodeGroup>
+
+## Feature Flags
+
+Implement feature toggles for gradual rollouts:
+
+<CodeGroup>
+```typescript Feature Flags
+// src/lib/features.ts
+export const FEATURES = {
+  SOCIAL_PULSE: process.env.NEXT_PUBLIC_ENABLE_TWITTER === 'true',
+  NARRATIVE_RADAR: process.env.NEXT_PUBLIC_ENABLE_RADAR === 'true',
+  ASK_MORE_CHAT: process.env.NEXT_PUBLIC_ENABLE_CHAT === 'true',
+  EXPORT_JSON: true,
+  EXPORT_SVG: true,
+};
+
+// Usage in components
+import { FEATURES } from '@/lib/features';
+
+{FEATURES.SOCIAL_PULSE && <SocialView />}
+```
+</CodeGroup>
+
+## Logging & Monitoring
+
+### Enable Debug Logging
+
+Add verbose logging for development:
+
+<CodeGroup>
+```typescript Debug Logging
+// .env
+NEXT_PUBLIC_DEBUG=true
+
+// src/lib/logger.ts
+export const debug = (...args: any[]) => {
+  if (process.env.NEXT_PUBLIC_DEBUG === 'true') {
+    console.log('[DEBUG]', ...args);
+  }
+};
+
+// Usage
+import { debug } from '@/lib/logger';
+debug('Blueprint generated:', blueprint);
+```
+</CodeGroup>
+
+### Error Tracking
+
+Integrate with error tracking services:
+
+<CodeGroup>
+```typescript Error Tracking
+// Install Sentry
+npm install @sentry/nextjs
+
+// next.config.js
+const { withSentryConfig } = require('@sentry/nextjs');
+
+module.exports = withSentryConfig(nextConfig, {
+  silent: true,
+  org: 'your-org',
+  project: 'argument-cartographer',
+});
+```
+</CodeGroup>
+
+## Multi-Language Support
+
+Configure internationalization:
+
+<CodeGroup>
+```typescript i18n Setup
+// next.config.js
+module.exports = {
+  i18n: {
+    locales: ['en', 'es', 'fr', 'hi'],
+    defaultLocale: 'en',
+  },
+};
+
+// Genkit prompts can target specific languages
+const searchQuery = await searchQueryPrompt({
+  input: userInput,
+  language: 'es', // Spanish
+});
+```
+</CodeGroup>
+
+## Advanced Configuration
+
+### Custom AI Prompts
+
+Override default prompts for specialized analysis:
+
+<CodeGroup>
+```typescript Custom Prompt
+const customAnalysisPrompt = ai.definePrompt({
+  name: 'academicAnalysis',
+  system: `You are an academic researcher specializing in philosophy and logic.
+  Your task is to analyze arguments with scholarly rigor...`,
+  // Use this instead of mainAnalysisPrompt
+});
+```
+</CodeGroup>
+
+### Rate Limiting
+
+Implement user-level rate limits:
+
+<CodeGroup>
+```typescript Rate Limiter
+// src/lib/rate-limit.ts
+export async function checkRateLimit(userId: string) {
+  const today = new Date().toDateString();
+  const key = `rate:${userId}:${today}`;
+  
+  const count = await redis.incr(key);
+  if (count === 1) {
+    await redis.expire(key, 86400); // 24 hours
+  }
+  
+  if (count > 50) { // 50 analyses per day
+    throw new Error('Rate limit exceeded');
+  }
+}
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deployment" icon="rocket" href="/deployment/vercel">
+    Deploy your configured instance
+  </Card>
+  
+  <Card title="Architecture" icon="sitemap" href="/architecture/overview">
+    Understand the system design
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/flows/generate-blueprint">
+    Explore the API surface
+  </Card>
+  
+  <Card title="Troubleshooting" icon="wrench" href="/troubleshooting/common-issues">
+    Solve common problems
+  </Card>
+</CardGroup>

@@ -1,0 +1,528 @@
+---
+title: Exporting Results
+description: Complete guide to exporting argument analyses as images, vectors, or raw data
+---
+
+## Overview
+
+Argument Cartographer provides powerful export capabilities, allowing you to save and share your analyses in multiple formats. Whether you need a high-resolution image for a presentation, a vector graphic for editing, or raw JSON data for programmatic use, we've got you covered.
+
+<Info>
+  Exports preserve the exact visual state of your current view mode - what you see is what you export.
+</Info>
+
+## Export Formats
+
+<CardGroup cols={3}>
+  <Card title="PNG" icon="image">
+    Raster image format
+    - Best for: Presentations, social media, documents
+    - Resolution: 1x, 2x, or 3x
+    - File size: Medium (500KB - 2MB)
+  </Card>
+  
+  <Card title="SVG" icon="vector-square">
+    Vector graphics format
+    - Best for: Design tools, infinite scaling
+    - Resolution: Infinite (vector)
+    - File size: Small (50-200KB)
+  </Card>
+  
+  <Card title="JSON" icon="file-code">
+    Raw data format
+    - Best for: Developers, data analysis
+    - Resolution: N/A (data only)
+    - File size: Tiny (10-50KB)
+  </Card>
+</CardGroup>
+
+## Opening the Export Modal
+
+<Steps>
+  <Step title="Complete Analysis">
+    Ensure your analysis has fully generated and you've selected your preferred visualization mode
+  </Step>
+  
+  <Step title="Click Export Button">
+    Find the **Export** button (download icon) in the analysis toolbar
+  </Step>
+  
+  <Step title="Configure Options">
+    Export modal opens with format and style options
+  </Step>
+</Steps>
+
+<CodeGroup>
+```tsx Export Button Location
+<AnalysisToolbar>
+  {/* Other buttons */}
+  <Button onClick={() => setExportModalOpen(true)}>
+    <Download className="h-4 w-4 mr-2" />
+    Export
+  </Button>
+</AnalysisToolbar>
+```
+</CodeGroup>
+
+## PNG Export
+
+Raster image format with configurable resolution.
+
+### Resolution Options
+
+<Tabs>
+  <Tab title="1x (Standard)">
+    **Use case:** Web sharing, email attachments, quick previews
+    
+    **Dimensions:** Native browser resolution (typically 1920x1080)
+    
+    **File size:** ~500KB
+    
+    **Pros:** Fast generation, small file
+    
+    **Cons:** May look pixelated on high-DPI screens
+  </Tab>
+  
+  <Tab title="2x (HD)">
+    **Use case:** Presentations, high-resolution displays, social media
+    
+    **Dimensions:** 2x native (typically 3840x2160)
+    
+    **File size:** ~1-1.5MB
+    
+    **Pros:** Sharp on all screens, good balance
+    
+    **Cons:** Slightly larger file
+    
+    **Recommended:** Default choice for most users
+  </Tab>
+  
+  <Tab title="3x (Print Quality)">
+    **Use case:** Printing, academic papers, publications
+    
+    **Dimensions:** 3x native (typically 5760x3240)
+    
+    **File size:** ~2-3MB
+    
+    **Pros:** Crystal clear when printed, futureproof
+    
+    **Cons:** Large file, slower generation
+  </Tab>
+</Tabs>
+
+### Color Mode
+
+Choose theme for exported image:
+
+- **Light Mode:** White/cream background, dark text
+  - Best for: Printing, light-themed presentations
+  - Background: `hsl(40, 50%, 98%)`
+  
+- **Dark Mode:** Dark slate background, light text
+  - Best for: Screens, modern presentations
+  - Background: `hsl(217, 14%, 10%)`
+
+<Tip>
+  **Transparent Background:** Uncheck "Include Background" to export with transparent background (PNG only). Perfect for overlaying on custom backgrounds.
+</Tip>
+
+### Export Process
+
+<CodeGroup>
+```typescript PNG Export Implementation
+import * as htmlToImage from 'html-to-image';
+
+const exportToPNG = async (element: HTMLElement, options) => {
+  const dataUrl = await htmlToImage.toPng(element, {
+    pixelRatio: options.resolution, // 1, 2, or 3
+    backgroundColor: options.includeBackground 
+      ? (options.theme === 'dark' ? 'hsl(217, 14%, 10%)' : 'hsl(40, 50%, 98%)')
+      : 'transparent',
+    style: {
+      // Force theme colors
+      backgroundColor: options.theme === 'dark' ? '...' : '...',
+      color: options.theme === 'dark' ? '...' : '...',
+    },
+  });
+  
+  // Download
+  const link = document.createElement('a');
+  link.download = 'argument-atlas-export.png';
+  link.href = dataUrl;
+  link.click();
+};
+```
+</CodeGroup>
+
+## SVG Export
+
+Vector format for infinite scalability.
+
+### Advantages of SVG
+
+<CardGroup cols={2}>
+  <Card title="Infinite Scaling" icon="maximize">
+    Zoom in forever without pixelation - perfect for large displays or print
+  </Card>
+  
+  <Card title="Small File Size" icon="file">
+    Text-based format compresses well, typically 50-200KB
+  </Card>
+  
+  <Card title="Editable" icon="pen">
+    Open in Adobe Illustrator, Figma, Inkscape to modify
+  </Card>
+  
+  <Card title="Web Native" icon="code">
+    Can be embedded directly in HTML with CSS styling
+  </Card>
+</CardGroup>
+
+### When to Use SVG
+
+<Tabs>
+  <Tab title="Design Work">
+    **Scenario:** You want to modify the visualization in a design tool
+    
+    **Workflow:**
+    1. Export as SVG
+    2. Open in Figma/Illustrator
+    3. Customize colors, fonts, layout
+    4. Export final version as PNG/PDF
+  </Tab>
+  
+  <Tab title="Large Format Printing">
+    **Scenario:** Printing poster-sized visualizations
+    
+    **Benefit:** No resolution concerns - scales to any size
+    
+    **Note:** Some complex CSS effects may not render perfectly in all SVG viewers
+  </Tab>
+  
+  <Tab title="Web Embedding">
+    **Scenario:** Including visualization in a website
+    
+    **Code:**
+    ```html
+    <img src="argument-map.svg" alt="Analysis" />
+    <!-- or inline -->
+    <svg>...</svg>
+    ```
+  </Tab>
+</Tabs>
+
+### Limitations
+
+<Warning>
+  **SVG Export Limitations:**
+  - Fonts may not embed due to browser CORS restrictions (falls back to system fonts)
+  - Some 3D transforms (Circular view flip cards) are flattened
+  - Complex shadows/gradients may not export perfectly
+  - File size can grow with very complex visualizations (50+ nodes)
+</Warning>
+
+## JSON Export
+
+Raw data export for developers and researchers.
+
+### Data Structure
+
+<CodeGroup>
+```json Example JSON Export
+{
+  "blueprint": [
+    {
+      "id": "thesis-1",
+      "parentId": null,
+      "type": "thesis",
+      "side": "for",
+      "content": "Universal Basic Income should be implemented...",
+      "sourceText": "User query",
+      "source": "https://user-input.local",
+      "fallacies": [],
+      "logicalRole": "Central contention"
+    },
+    {
+      "id": "claim-1",
+      "parentId": "thesis-1",
+      "type": "claim",
+      "side": "for",
+      "content": "UBI reduces poverty by providing income floor",
+      "sourceText": "A 2023 study found that UBI pilot programs...",
+      "source": "https://bbc.com/ubi-study",
+      "fallacies": [],
+      "logicalRole": "Primary economic argument"
+    }
+  ],
+  "summary": "The debate over Universal Basic Income...",
+  "analysis": "This analysis reveals...",
+  "credibilityScore": 7,
+  "brutalHonestTake": "UBI sounds great in theory but...",
+  "keyPoints": [
+    "Strong evidence for poverty reduction",
+    "Cost concerns remain unresolved"
+  ],
+  "socialPulse": "Public opinion is divided...",
+  "tweets": [...],
+  "fallacies": [...]
+}
+```
+</CodeGroup>
+
+### Use Cases for JSON
+
+<AccordionGroup>
+  <Accordion title="Data Analysis">
+    Import into Python/R for statistical analysis:
+    
+    ```python
+    import json
+    import pandas as pd
+    
+    with open('analysis.json') as f:
+        data = json.load(f)
+    
+    # Analyze fallacy distribution
+    fallacies_df = pd.DataFrame(data['fallacies'])
+    print(fallacies_df.groupby('severity').size())
+    
+    # Analyze claim balance
+    claims = [n for n in data['blueprint'] if n['type'] == 'claim']
+    for_count = sum(1 for c in claims if c['side'] == 'for')
+    against_count = len(claims) - for_count
+    ```
+  </Accordion>
+  
+  <Accordion title="Custom Visualization">
+    Build your own visualization with D3.js, Plotly, etc:
+    
+    ```javascript
+    fetch('analysis.json')
+      .then(r => r.json())
+      .then(data => {
+        // Custom D3 force-directed graph
+        const nodes = data.blueprint;
+        const links = nodes.filter(n => n.parentId).map(n => ({
+          source: n.parentId,
+          target: n.id
+        }));
+        
+        // Render with D3...
+      });
+    ```
+  </Accordion>
+  
+  <Accordion title="Archive & Versioning">
+    Store multiple versions to track evolution:
+    
+    ```bash
+    # Save with timestamp
+    analysis-2024-03-08-v1.json
+    analysis-2024-03-15-v2.json
+    
+    # Compare with diff tool
+    diff analysis-v1.json analysis-v2.json
+    ```
+  </Accordion>
+  
+  <Accordion title="API Integration">
+    Feed data into other systems:
+    
+    ```javascript
+    // Post to your backend
+    await fetch('/api/save-analysis', {
+      method: 'POST',
+      body: JSON.stringify(analysisData),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Copy to Clipboard
+
+Quick sharing without saving files.
+
+### Image Copy
+
+<Steps>
+  <Step title="Configure Export">
+    Set format (PNG/SVG), resolution, and theme
+  </Step>
+  
+  <Step title="Click Copy Button">
+    Instead of Download, click **Copy** button
+  </Step>
+  
+  <Step title="Paste Anywhere">
+    Paste directly into:
+    - Google Docs / Microsoft Word
+    - Slack / Discord / Teams
+    - Email clients
+    - Image editors
+  </Step>
+</Steps>
+
+<Tip>
+  **Clipboard API:** Modern browsers support copying images to clipboard. On older browsers, the Copy button may not appear.
+</Tip>
+
+### JSON Copy
+
+Copies raw JSON text to clipboard:
+
+<CodeGroup>
+```typescript Copy JSON to Clipboard
+const copyJSON = async (data: any) => {
+  const jsonString = JSON.stringify(data, null, 2); // Pretty-printed
+  await navigator.clipboard.writeText(jsonString);
+  
+  toast({
+    title: "Copied to Clipboard",
+    description: "JSON data is ready to paste",
+  });
+};
+```
+</CodeGroup>
+
+## Social Sharing
+
+Direct sharing to social platforms.
+
+### Supported Platforms
+
+<Tabs>
+  <Tab title="X (Twitter)">
+    Share link with pre-filled text:
+    
+    ```javascript
+    const shareToTwitter = (topic: string) => {
+      const text = `Check out this argument analysis I created with Argument Cartographer: "${topic}" #ArgumentAtlas`;
+      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    };
+    ```
+  </Tab>
+  
+  <Tab title="LinkedIn">
+    Professional sharing:
+    
+    ```javascript
+    const shareToLinkedIn = (url: string) => {
+      const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+      window.open(shareUrl, '_blank');
+    };
+    ```
+  </Tab>
+  
+  <Tab title="WhatsApp">
+    Mobile-friendly sharing:
+    
+    ```javascript
+    const shareToWhatsApp = (text: string) => {
+      const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    };
+    ```
+  </Tab>
+  
+  <Tab title="Telegram">
+    Instant messaging:
+    
+    ```javascript
+    const shareToTelegram = (url: string, text: string) => {
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+      window.open(shareUrl, '_blank');
+    };
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  Social sharing posts a link to your analysis (if published) plus generated text. It does NOT upload the visualization image automatically.
+</Note>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Choose Right Format" icon="bullseye">
+    - PNG for general use
+    - SVG for design/print
+    - JSON for data analysis
+  </Card>
+  
+  <Card title="Optimize Resolution" icon="sliders">
+    - 2x for screens
+    - 3x for printing
+    - 1x for quick sharing
+  </Card>
+  
+  <Card title="Match Theme" icon="palette">
+    - Light for printing
+    - Dark for screens
+    - Transparent for custom backgrounds
+  </Card>
+  
+  <Card title="Test Before Sharing" icon="eye">
+    - Preview export before sending
+    - Check text readability
+    - Verify no content cut off
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Export is Blank/Corrupted">
+    **Causes:**
+    - 3D transforms not flattened (Circular view)
+    - CSS animations mid-transition
+    - Browser extension interference
+    
+    **Solutions:**
+    - Try different visualization mode (Flow/Balanced)
+    - Disable browser extensions temporarily
+    - Try different format (SVG instead of PNG)
+  </Accordion>
+  
+  <Accordion title="Text is Blurry in PNG">
+    **Cause:** Using 1x resolution on high-DPI screen
+    
+    **Solution:** Increase to 2x or 3x resolution
+  </Accordion>
+  
+  <Accordion title="File Size is Too Large">
+    **Causes:**
+    - 3x resolution PNG
+    - Complex visualization with many nodes
+    
+    **Solutions:**
+    - Reduce to 2x or 1x
+    - Use SVG instead (much smaller)
+    - Simplify view mode (Pillar instead of Circular)
+  </Accordion>
+  
+  <Accordion title="Copy to Clipboard Fails">
+    **Causes:**
+    - Unsupported browser (Safari < 13.1)
+    - Site not served over HTTPS
+    - Browser permissions denied
+    
+    **Solutions:**
+    - Use Download instead
+    - Update browser
+    - Check site is HTTPS
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Visualization Modes" icon="eye" href="/guides/visualization-modes">
+    Master all 6 view modes for better exports
+  </Card>
+  
+  <Card title="Creating Analysis" icon="plus" href="/guides/creating-analysis">
+    Generate high-quality analyses worth exporting
+  </Card>
+</CardGroup>

@@ -1,97 +1,148 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Welcome to Argument Cartographer"
+description: "Map, analyze, and visualize complex arguments with AI-powered logical fallacy detection and real-time data"
 ---
 
-## Setting up
+<div className="hero-section" style={{
+  background: 'linear-gradient(135deg, rgba(18, 22, 29, 0.95) 0%, rgba(30, 30, 30, 0.98) 100%)',
+  border: '1px solid rgba(0, 255, 255, 0.6)',
+  borderRadius: '12px',
+  padding: '3rem 2rem',
+  marginBottom: '3rem',
+  boxShadow: '0 0 8px rgba(0, 255, 255, 0.4)'
+}}>
+  <h1 style={{
+    fontSize: '3rem',
+    fontWeight: '700',
+    background: 'linear-gradient(135deg, #3ef0d1 0%, #4cd7c9 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    marginBottom: '1rem'
+  }}>
+    Mapping the Landscape of Truth
+  </h1>
+  <p style={{
+    fontSize: '1.25rem',
+    color: '#e1e1e1',
+    marginBottom: '2rem',
+    lineHeight: '1.8'
+  }}>
+    Combat misinformation and polarization by structurally analyzing arguments. Unlike traditional fact-checkers, Argument Cartographer decomposes complex narratives into their atomic logical components—Theses, Claims, Evidence, and Counterclaims.
+  </p>
+  <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+    <a href="/quickstart" style={{
+      background: 'rgba(62, 240, 209, 0.1)',
+      color: '#3ef0d1',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '20px',
+      textDecoration: 'none',
+      fontWeight: '600',
+      border: '1px solid #3ef0d1'
+    }}>
+      Get Started →
+    </a>
+    <a href="/how-it-works" style={{
+      background: 'transparent',
+      color: '#3ef0d1',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '20px',
+      textDecoration: 'none',
+      fontWeight: '600',
+      border: '1px solid #3ef0d1'
+    }}>
+      Learn How It Works
+    </a>
+  </div>
+</div>
 
-Get your documentation site up and running in minutes.
+## Core Features
+
+Powerful tools for argument analysis and visualization.
+
+<CardGroup cols={2}>
+  <Card
+    title="Interactive Argument Mapping"
+    icon="diagram-project"
+    href="/features/argument-mapping"
+  >
+    Visualize logical flow with node-based interfaces. Trace claims to supporting evidence with multiple view modes.
+  </Card>
+  <Card
+    title="Logical Fallacy Detection"
+    icon="triangle-exclamation"
+    href="/features/fallacy-detection"
+  >
+    Automatically identify and categorize logical flaws like Ad Hominem, Straw Man, and False Dichotomy.
+  </Card>
+  <Card
+    title="Narrative Radar"
+    icon="radar"
+    href="/features/narrative-radar"
+  >
+    Real-time feed of trending topics analyzed for logical integrity and public sentiment.
+  </Card>
+  <Card
+    title="Credibility Scoring"
+    icon="scale-balanced"
+    href="/features/credibility-scoring"
+  >
+    Data-backed scores (1-10) based on evidence strength and fallacy presence.
+  </Card>
+  <Card
+    title="Social Pulse"
+    icon="comments"
+    href="/features/social-pulse"
+  >
+    Integrate Twitter sentiment analysis to ground arguments in real-time public discourse.
+  </Card>
+  <Card
+    title="AI-Powered Analysis"
+    icon="brain"
+    href="/architecture/ai-orchestration"
+  >
+    Leverage Google Gemini 1.5 Pro for deep contextual reasoning and synthesis.
+  </Card>
+</CardGroup>
+
+## Quick Start
+
+<CardGroup cols={2}>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Set up your local development environment in minutes.
+  </Card>
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/configuration"
+  >
+    Configure API keys for Google GenAI, Firecrawl, and Twitter.
+  </Card>
+  <Card
+    title="Creating Analysis"
+    icon="microscope"
+    href="/guides/creating-analysis"
+  >
+    Learn how to analyze topics, URLs, and documents.
+  </Card>
+  <Card
+    title="Visualization Modes"
+    icon="eye"
+    href="/guides/visualization-modes"
+  >
+    Explore Flow, Tree, Compass, and Circular view modes.
+  </Card>
+</CardGroup>
+
+## Technical Architecture
 
 <Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
+  title="System Architecture"
+  icon="sitemap"
+  href="/architecture/overview"
 >
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
+  Built on Next.js 15, Google Genkit, Firebase, and real-time external data sources. Learn about our modern monolithic architecture optimized for edge deployment.
 </Card>

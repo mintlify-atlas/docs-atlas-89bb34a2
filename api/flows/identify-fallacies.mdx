@@ -1,0 +1,121 @@
+---
+title: 'Identify Logical Fallacies'
+description: 'Analyze argument text to detect and explain logical fallacies'
+icon: 'triangle-exclamation'
+---
+
+## Overview
+
+The `identifyLogicalFallacies` flow analyzes a piece of argument text to identify any logical fallacies present and provides detailed explanations for each detected fallacy.
+
+This flow is used as a standalone tool for fallacy analysis and can be applied to any argument text.
+
+## Function Signature
+
+```typescript
+export async function identifyLogicalFallacies(
+  input: IdentifyLogicalFallaciesInput
+): Promise<IdentifyLogicalFallaciesOutput>
+```
+
+**Source:** `src/ai/flows/identify-logical-fallacies.ts:30`
+
+## Input Schema
+
+<ParamField path="argumentText" type="string" required>
+  The text of the argument to analyze for logical fallacies.
+</ParamField>
+
+### Input Type
+
+```typescript
+const IdentifyLogicalFallaciesInputSchema = z.object({
+  argumentText: z
+    .string()
+    .describe('The text of the argument to analyze for logical fallacies.'),
+});
+
+type IdentifyLogicalFallaciesInput = z.infer<typeof IdentifyLogicalFallaciesInputSchema>;
+```
+
+## Output Schema
+
+<ResponseField name="fallacies" type="string[]" required>
+  An array of logical fallacies identified in the argument.
+</ResponseField>
+
+<ResponseField name="explanation" type="string" required>
+  A detailed explanation of each identified logical fallacy.
+</ResponseField>
+
+### Output Type
+
+```typescript
+const IdentifyLogicalFallaciesOutputSchema = z.object({
+  fallacies: z
+    .array(z.string())
+    .describe('An array of logical fallacies identified in the argument.'),
+  explanation: z
+    .string()
+    .describe('A detailed explanation of each identified logical fallacy.'),
+});
+
+type IdentifyLogicalFallaciesOutput = z.infer<typeof IdentifyLogicalFallaciesOutputSchema>;
+```
+
+## Example Usage
+
+```typescript
+import { identifyLogicalFallacies } from '@/ai/flows/identify-logical-fallacies';
+
+const result = await identifyLogicalFallacies({
+  argumentText: `Everyone I know supports this policy, so it must be the right choice. 
+  And if you disagree, you're just not smart enough to understand it.`
+});
+
+console.log('Detected fallacies:', result.fallacies);
+// Output: ['Ad Populum (Bandwagon)', 'Ad Hominem']
+
+console.log('Explanation:', result.explanation);
+```
+
+## Common Fallacy Types Detected
+
+The AI is trained to identify various logical fallacies including:
+
+- **Ad Hominem**: Attacking the person instead of the argument
+- **Straw Man**: Misrepresenting an opponent's position
+- **False Dichotomy**: Presenting only two options when more exist
+- **Appeal to Authority**: Using authority as the sole basis for truth
+- **Slippery Slope**: Claiming one action will lead to extreme consequences
+- **Circular Reasoning**: Using the conclusion as a premise
+- **Hasty Generalization**: Drawing conclusions from insufficient evidence
+- **Red Herring**: Introducing irrelevant information to distract
+- And many more...
+
+## Implementation Details
+
+The flow uses a specialized AI prompt that:
+
+1. Analyzes the argument text for logical errors
+2. Identifies specific fallacy types present
+3. Explains why each instance constitutes a fallacy
+4. Returns structured output with fallacy names and explanations
+
+**Prompt Template** (from `src/ai/flows/identify-logical-fallacies.ts:40`):
+
+```
+You are an expert in logical fallacies. Your task is to identify any logical 
+fallacies present in the given argument text and provide a detailed explanation 
+for each fallacy.
+
+Argument Text: {argumentText}
+
+Identify the fallacies and provide explanations:
+```
+
+## Related
+
+- [Explain Logical Fallacy Flow](/api/flows/explain-fallacy)
+- [Fallacy Detection Schema](/api/schemas/fallacy-detection)
+- [Generate Blueprint Flow](/api/flows/generate-blueprint) - includes fallacy detection

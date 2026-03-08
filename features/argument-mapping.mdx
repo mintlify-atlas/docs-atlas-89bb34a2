@@ -1,0 +1,535 @@
+---
+title: Argument Mapping
+description: Interactive visualization of logical argument structures with node-based navigation
+---
+
+## Overview
+
+Argument Mapping is the core feature of Argument Cartographer, transforming abstract debates into tangible, navigable visual structures. Unlike traditional text-based analysis, our maps reveal the skeletal logic underlying complex arguments.
+
+<CardGroup cols={2}>
+  <Card title="Visual Structure" icon="diagram-project">
+    See how claims connect to evidence in an intuitive graph layout
+  </Card>
+  <Card title="Interactive Exploration" icon="hand-pointer">
+    Click nodes to reveal details, sources, and detected fallacies
+  </Card>
+  <Card title="Multiple Views" icon="eye">
+    Switch between 6 different visualization modes instantly
+  </Card>
+  <Card title="Export Ready" icon="download">
+    Export high-resolution maps as PNG, SVG, or JSON
+  </Card>
+</CardGroup>
+
+## Argument Node Types
+
+Every argument is decomposed into four fundamental node types:
+
+### Thesis Node
+
+The central contention or question being debated.
+
+<CodeGroup>
+```typescript Thesis Example
+{
+  id: "thesis-1",
+  type: "thesis",
+  parentId: null, // Root node
+  side: "for",
+  content: "Universal Basic Income should be implemented nationwide",
+  source: "https://user-input.local",
+  sourceText: "User query",
+  fallacies: [],
+  logicalRole: "Central contention of the debate"
+}
+```
+</CodeGroup>
+
+**Visual representation:**
+- Appears at the top or center depending on view mode
+- Larger size than other nodes
+- Neutral color (dark gray or slate)
+- Connected to all top-level claims
+
+### Claim Nodes (For)
+
+Supporting arguments in favor of the thesis.
+
+<CodeGroup>
+```typescript Claim Example
+{
+  id: "claim-1",
+  type: "claim",
+  parentId: "thesis-1",
+  side: "for",
+  content: "UBI reduces poverty by providing guaranteed income floor",
+  source: "https://bbc.com/ubi-study",
+  sourceText: "A 2023 study found that UBI pilot programs reduced extreme poverty by 45%...",
+  fallacies: [],
+  logicalRole: "Primary economic argument for implementation"
+}
+```
+</CodeGroup>
+
+**Visual representation:**
+- Green/emerald color scheme
+- Positioned on left side (Balanced/Pillar view) or mixed
+- Badge: "✓ For" or "Supporting"
+
+### Counterclaim Nodes (Against)
+
+Objections and arguments opposing the thesis.
+
+<CodeGroup>
+```typescript Counterclaim Example
+{
+  id: "counterclaim-1",
+  type: "counterclaim",
+  parentId: "thesis-1",
+  side: "against",
+  content: "UBI is too expensive and would require massive tax increases",
+  source: "https://reuters.com/ubi-costs",
+  sourceText: "Economists estimate a nationwide UBI program would cost $3.9 trillion annually...",
+  fallacies: ["appeal-to-fear"],
+  logicalRole: "Primary fiscal objection to implementation"
+}
+```
+</CodeGroup>
+
+**Visual representation:**
+- Red/rose color scheme
+- Positioned on right side (Balanced/Pillar view) or mixed
+- Badge: "✗ Against" or "Objection"
+
+### Evidence Nodes
+
+Primary source data, studies, quotes supporting claims or counterclaims.
+
+<CodeGroup>
+```typescript Evidence Example
+{
+  id: "evidence-1",
+  type: "evidence",
+  parentId: "claim-1",
+  side: "for",
+  content: "Finland's 2017-2018 trial: 55% reduction in stress, increased well-being",
+  source: "https://oecd.org/finland-ubi-report",
+  sourceText: "Participants in Finland's UBI experiment reported a 55% reduction in stress levels and increased life satisfaction compared to control groups.",
+  fallacies: [],
+  logicalRole: "Empirical evidence from real-world trial"
+}
+```
+</CodeGroup>
+
+**Visual representation:**
+- Smaller size than claims
+- Blue/teal color for supporting evidence
+- Orange for counter-evidence
+- Icon: 📄 (document) or 📊 (chart)
+
+## Visualization Modes
+
+Argument Cartographer offers 6 distinct visualization modes, each optimized for different use cases.
+
+### Flow View
+
+Classical argument structure with vertical flow from thesis to conclusion.
+
+<Tabs>
+  <Tab title="Description">
+    - **Thesis** at top center
+    - **Reasons** (for) flow down left lane
+    - **Objections** (against) flow down right lane
+    - **Evidence** attached below each claim
+    - **Conclusion** at bottom
+    
+    **Best for:** Understanding logical progression and how arguments build
+  </Tab>
+  
+  <Tab title="Implementation">
+    ```tsx Component
+    <FlowMapView data={analysisResult} />
+    ```
+    
+    Key features:
+    - Vertical connecting lines showing flow
+    - Symmetric layout for visual balance
+    - Clear separation of supporting vs opposing
+  </Tab>
+</Tabs>
+
+<Info>
+  Flow View is inspired by traditional Toulmin argument diagrams used in academic logic courses.
+</Info>
+
+### Balanced View
+
+Side-by-side comparison of "For" vs "Against" arguments.
+
+<Tabs>
+  <Tab title="Description">
+    - **Split layout:** Green (For) on left, Red (Against) on right
+    - **Thesis** spans both columns at top
+    - **Direct comparison** of opposing viewpoints
+    - **Evidence** nested under each claim
+    
+    **Best for:** Weighing pros and cons, seeing both sides equally
+  </Tab>
+  
+  <Tab title="Implementation">
+    ```tsx Component
+    <BalancedView data={blueprint} />
+    ```
+    
+    Algorithm:
+    1. Filter nodes by `side: 'for'` vs `side: 'against'`
+    2. Render in parallel columns
+    3. Match vertical alignment where possible
+  </Tab>
+</Tabs>
+
+### Tree View
+
+Hierarchical tree structure showing parent-child relationships.
+
+<Tabs>
+  <Tab title="Description">
+    - **Thesis** as root node
+    - **Claims** as child nodes (branching)
+    - **Evidence** as leaf nodes
+    - Expandable/collapsible branches
+    
+    **Best for:** Tracing lineage, understanding dependencies
+  </Tab>
+  
+  <Tab title="Implementation">
+    ```tsx Recursive Tree
+    const TreeNode = ({ node, depth }) => (
+      <div style={{ paddingLeft: depth * 20 }}>
+        <NodeCard node={node} />
+        {children.map(child => (
+          <TreeNode node={child} depth={depth + 1} />
+        ))}
+      </div>
+    );
+    ```
+  </Tab>
+</Tabs>
+
+### Compass View
+
+Circular layout with thesis at center, claims radiating outward.
+
+<Tabs>
+  <Tab title="Description">
+    - **Thesis** in center circle
+    - **Claims** positioned around perimeter
+    - **Angle** based on side (for: 0-180°, against: 180-360°)
+    - **Evidence** as outer rings
+    
+    **Best for:** Seeing the big picture, spatial relationships
+  </Tab>
+  
+  <Tab title="Implementation">
+    ```tsx Polar Coordinates
+    const angle = (index / totalClaims) * Math.PI * 2;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  Compass View uses color-coded quadrants: green (top-left) for strong supporting, red (top-right) for strong opposing.
+</Tip>
+
+### Circular View
+
+3D flip cards arranged in circular pattern for engaging exploration.
+
+<Tabs>
+  <Tab title="Description">
+    - **Interactive cards** that flip on click
+    - **Front:** Claim summary + icon
+    - **Back:** Full details + evidence
+    - Arranged in circle with perspective transforms
+    
+    **Best for:** Presentations, interactive exploration, visual engagement
+  </Tab>
+  
+  <Tab title="Implementation">
+    ```tsx Flip Card
+    <motion.div
+      className="card-container"
+      style={{
+        transform: `rotateY(${isFlipped ? 180 : 0}deg)`,
+        transformStyle: 'preserve-3d',
+      }}
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <div className="card-front">{summary}</div>
+      <div className="card-back">{details}</div>
+    </motion.div>
+    ```
+  </Tab>
+</Tabs>
+
+### Pillar View
+
+Vertical columns for each side, maximizing information density.
+
+<Tabs>
+  <Tab title="Description">
+    - **Column 1:** Supporting arguments stacked vertically
+    - **Column 2:** Opposing arguments stacked vertically
+    - **Headers:** "Supporting Reasons" vs "Objections & Rebuttals"
+    - Compact cards with minimal spacing
+    
+    **Best for:** Printing, dense information review, academic papers
+  </Tab>
+  
+  <Tab title="Implementation">
+    ```tsx Columns
+    <div className="grid grid-cols-2 gap-8">
+      <div className="space-y-4">
+        {forClaims.map(claim => <ArgumentCard node={claim} />)}
+      </div>
+      <div className="space-y-4">
+        {againstClaims.map(claim => <ArgumentCard node={claim} />)}
+      </div>
+    </div>
+    ```
+  </Tab>
+</Tabs>
+
+## Interactive Features
+
+### Node Click Behavior
+
+Clicking any node opens a detailed panel:
+
+<Steps>
+  <Step title="Expand Node">
+    Node enlarges slightly with smooth animation
+  </Step>
+  
+  <Step title="Show Detail Panel">
+    Slide-in panel from right showing:
+    - Full content text
+    - Source URL (clickable)
+    - Original source text (verbatim quote)
+    - Logical role explanation
+    - Detected fallacies (if any)
+    - Related nodes (parent, children)
+  </Step>
+  
+  <Step title="Highlight Path">
+    Entire lineage (thesis → claim → evidence) highlighted
+  </Step>
+</Steps>
+
+<CodeGroup>
+```tsx Detail Panel Component
+const DetailPanel = ({ node }) => (
+  <div className="detail-panel">
+    <Badge>{node.type}</Badge>
+    <h3>{node.content}</h3>
+    
+    <Section title="Source">
+      <a href={node.source} target="_blank">{node.source}</a>
+    </Section>
+    
+    <Section title="Original Text">
+      <blockquote>"{node.sourceText}"</blockquote>
+    </Section>
+    
+    <Section title="Logical Role">
+      <p>{node.logicalRole}</p>
+    </Section>
+    
+    {node.fallacies.length > 0 && (
+      <Section title="Detected Fallacies">
+        {node.fallacies.map(f => <FallacyBadge fallacy={f} />)}
+      </Section>
+    )}
+  </div>
+);
+```
+</CodeGroup>
+
+### Hover States
+
+- **Subtle highlight** on mouse over
+- **Tooltip** showing node type and summary
+- **Connected edges** brighten to show relationships
+
+### Keyboard Navigation
+
+- **Tab** - Move between nodes
+- **Enter** - Expand selected node
+- **Escape** - Close detail panel
+- **Arrow keys** - Navigate tree structure
+
+## Node Styling
+
+Each node type has distinct visual styling:
+
+<CodeGroup>
+```tsx Node Styles
+const getNodeStyle = (node: ArgumentNode) => {
+  const baseStyle = "rounded-lg p-4 shadow-md cursor-pointer transition-all";
+  
+  switch (node.type) {
+    case 'thesis':
+      return `${baseStyle} bg-slate-900 text-slate-50 text-lg font-bold`;
+    
+    case 'claim':
+      return node.side === 'for'
+        ? `${baseStyle} bg-emerald-50 border-2 border-emerald-200`
+        : `${baseStyle} bg-rose-50 border-2 border-rose-200`;
+    
+    case 'evidence':
+      return node.side === 'for'
+        ? `${baseStyle} bg-blue-50 border border-blue-100 text-sm`
+        : `${baseStyle} bg-orange-50 border border-orange-100 text-sm`;
+    
+    default:
+      return baseStyle;
+  }
+};
+```
+</CodeGroup>
+
+## Export Capabilities
+
+All visualization modes support high-quality export:
+
+### Export Process
+
+<Steps>
+  <Step title="Click Export Button">
+    Opens export modal with configuration options
+  </Step>
+  
+  <Step title="Choose Format">
+    PNG (raster), SVG (vector), or JSON (data)
+  </Step>
+  
+  <Step title="Configure Settings">
+    - Resolution: 1x, 2x, 3x
+    - Theme: Light or Dark
+    - Background: Yes or No
+  </Step>
+  
+  <Step title="Download or Copy">
+    File downloads immediately or copies to clipboard
+  </Step>
+</Steps>
+
+<CodeGroup>
+```typescript Export Implementation
+import * as htmlToImage from 'html-to-image';
+
+const exportToPNG = async (element: HTMLElement, scale: number) => {
+  const dataUrl = await htmlToImage.toPng(element, {
+    pixelRatio: scale,
+    backgroundColor: '#ffffff',
+  });
+  
+  const link = document.createElement('a');
+  link.download = 'argument-map.png';
+  link.href = dataUrl;
+  link.click();
+};
+```
+</CodeGroup>
+
+<Tip>
+  Use 3x resolution for print-quality exports. SVG format is best for further editing in design tools.
+</Tip>
+
+## Performance Optimization
+
+Large argument maps (50+ nodes) use optimization techniques:
+
+### Virtualization
+
+Only render visible nodes in viewport:
+
+<CodeGroup>
+```tsx Virtual Scrolling
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+const virtualizer = useVirtualizer({
+  count: nodes.length,
+  getScrollElement: () => scrollRef.current,
+  estimateSize: () => 100,
+});
+```
+</CodeGroup>
+
+### Lazy Loading
+
+Defer rendering of evidence nodes until claim is expanded:
+
+<CodeGroup>
+```tsx Lazy Evidence
+const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+
+{claim.children.length > 0 && expandedNodes.has(claim.id) && (
+  <div className="evidence-container">
+    {claim.children.map(evidence => (
+      <EvidenceNode key={evidence.id} node={evidence} />
+    ))}
+  </div>
+)}
+```
+</CodeGroup>
+
+## Accessibility
+
+All visualizations meet WCAG 2.1 AA standards:
+
+- **Keyboard navigation** - Full functionality without mouse
+- **Screen reader support** - ARIA labels on all interactive elements
+- **High contrast** - Text passes 4.5:1 contrast ratio
+- **Focus indicators** - Clear visual focus states
+
+<CodeGroup>
+```tsx Accessibility Attributes
+<div
+  role="button"
+  tabIndex={0}
+  aria-label={`${node.type}: ${node.content}`}
+  aria-expanded={isExpanded}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      handleClick();
+    }
+  }}
+>
+  {node.content}
+</div>
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Visualization Guide" icon="eye" href="/guides/visualization-modes">
+    Deep dive into each view mode
+  </Card>
+  
+  <Card title="Fallacy Detection" icon="shield-check" href="/features/fallacy-detection">
+    Learn about logical fallacy identification
+  </Card>
+  
+  <Card title="Export Results" icon="download" href="/guides/exporting-results">
+    Master the export workflow
+  </Card>
+  
+  <Card title="Creating Analyses" icon="plus" href="/guides/creating-analysis">
+    Best practices for analysis creation
+  </Card>
+</CardGroup>

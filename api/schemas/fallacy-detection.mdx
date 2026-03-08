@@ -1,0 +1,214 @@
+---
+title: 'Fallacy Detection Schema'
+description: 'Structure for detected logical fallacies'
+icon: 'shield-exclamation'
+---
+
+## Overview
+
+The `DetectedFallacy` schema defines the structure of logical fallacies identified in argument analysis. Each fallacy includes severity, confidence, explanation, and suggestions for improvement.
+
+This schema enables Argument Cartographer to provide educational feedback on reasoning errors.
+
+## Schema Definition
+
+```typescript
+const DetectedFallacySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  severity: z.enum(['Critical', 'Major', 'Minor']),
+  category: z.string(),
+  confidence: z.number().min(0).max(1),
+  problematicText: z.string(),
+  explanation: z.string(),
+  definition: z.string(),
+  avoidance: z.string(),
+  example: z.string(),
+  suggestion: z.string(),
+  location: z.string().optional(),
+});
+```
+
+**Source:** `src/ai/flows/generate-argument-blueprint.ts:62`
+
+## Fields
+
+### Identification
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the detected fallacy.
+  
+  Format: Usually "f1", "f2", "f3", etc.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  The name of the logical fallacy.
+  
+  Examples: "Ad Hominem", "Straw Man", "False Dichotomy", "Appeal to Emotion"
+</ParamField>
+
+<ParamField path="category" type="string" required>
+  The category or type of fallacy.
+  
+  Examples:
+  - "Emotional Fallacy"
+  - "Logical Structure"
+  - "Relevance Fallacy"
+  - "Ambiguity"
+  - "Presumption"
+</ParamField>
+
+### Assessment
+
+<ParamField path="severity" type="enum" required>
+  The severity of the fallacy's impact on the argument.
+  
+  Possible values:
+  - `Critical`: Fundamentally undermines the argument
+  - `Major`: Significantly weakens the argument
+  - `Minor`: Mild logical issue, doesn't invalidate the argument
+</ParamField>
+
+<ParamField path="confidence" type="number" required>
+  AI's confidence that this is actually a fallacy (0.0 to 1.0).
+  
+  - 0.9-1.0: Very confident
+  - 0.7-0.89: Confident
+  - 0.5-0.69: Moderate confidence
+  - Below 0.5: Low confidence (rarely flagged)
+</ParamField>
+
+### Content
+
+<ParamField path="problematicText" type="string" required>
+  The exact quote or text containing the fallacy.
+  
+  Direct excerpt from the source material.
+</ParamField>
+
+<ParamField path="explanation" type="string" required>
+  Why this is a fallacy and how it affects the argument.
+  
+  Clear explanation of the reasoning error.
+</ParamField>
+
+### Educational Information
+
+<ParamField path="definition" type="string" required>
+  A general definition of this type of fallacy.
+  
+  Educational content explaining what this fallacy is in general terms.
+</ParamField>
+
+<ParamField path="avoidance" type="string" required>
+  How to avoid this fallacy in general.
+  
+  Guidance on better reasoning practices.
+</ParamField>
+
+<ParamField path="example" type="string" required>
+  A simple, illustrative example of this fallacy.
+  
+  Generic example to help users understand the pattern.
+</ParamField>
+
+<ParamField path="suggestion" type="string" required>
+  Specific suggestion for how to rephrase this argument logically.
+  
+  Tailored advice for improving the specific problematic text.
+</ParamField>
+
+### Context
+
+<ParamField path="location" type="string">
+  Where the fallacy appears (optional).
+  
+  Examples:
+  - "Node 3"
+  - "Counterclaim against economic policy"
+  - "Evidence in section 2"
+</ParamField>
+
+## Example
+
+```json
+{
+  "id": "f1",
+  "name": "Ad Hominem",
+  "severity": "Major",
+  "category": "Relevance Fallacy",
+  "confidence": 0.92,
+  "problematicText": "You can't trust Dr. Smith's climate research because he owns an SUV.",
+  "explanation": "This attacks Dr. Smith's personal choices rather than addressing the validity of his research. The ownership of an SUV does not logically invalidate scientific research.",
+  "definition": "Ad Hominem is a fallacy where someone attacks the person making the argument rather than the argument itself.",
+  "avoidance": "Focus on evaluating the evidence and reasoning presented, not the character or behavior of the person presenting it.",
+  "example": "Instead of saying 'John is wrong because he's a bad person,' examine whether John's actual argument is sound.",
+  "suggestion": "Rephrase to address the research methodology: 'Dr. Smith's research should be evaluated based on its methodology, data sources, and peer review, not his personal vehicle choices.'",
+  "location": "Node 5"
+}
+```
+
+```json
+{
+  "id": "f2",
+  "name": "False Dichotomy",
+  "severity": "Critical",
+  "category": "Logical Structure",
+  "confidence": 0.88,
+  "problematicText": "Either we implement this policy immediately, or we're doomed to economic collapse.",
+  "explanation": "This presents only two extreme options when there are likely many alternatives, such as gradual implementation, modified versions of the policy, or entirely different approaches.",
+  "definition": "False Dichotomy (or False Dilemma) occurs when an argument presents only two options as the only possibilities when more options exist.",
+  "avoidance": "Acknowledge the full range of options and consider middle-ground solutions or alternative approaches.",
+  "example": "'Either you're with us or against us' ignores the possibility of neutral positions or partial agreement.",
+  "suggestion": "Rephrase to: 'This policy is one of several options for addressing economic concerns. Alternatives include [X, Y, Z], and we should evaluate each approach's merits.'",
+  "location": "Node 8"
+}
+```
+
+## Severity Guidelines
+
+### Critical
+- Fundamentally undermines the argument's logic
+- Makes the conclusion unreliable
+- Examples: False Dichotomy, Circular Reasoning, Begging the Question
+
+### Major
+- Significantly weakens the argument
+- Requires addressing to make argument sound
+- Examples: Ad Hominem, Straw Man, Hasty Generalization
+
+### Minor
+- Minor logical issue or weak point
+- Doesn't completely invalidate the argument
+- Examples: Minor appeals to emotion, slight exaggeration
+
+## Usage in Flows
+
+### Generate Blueprint
+
+Fallacies are detected during main analysis:
+
+```typescript
+const coreAnalysis = await mainAnalysisPrompt({
+  input: input.input,
+  searchQuery: searchQuery,
+  context: context
+});
+
+// coreAnalysis.fallacies contains DetectedFallacy[]
+```
+
+### Display to Users
+
+Fallacies are highlighted in the UI:
+- Visual indicators on argument nodes
+- Severity color coding (red=Critical, orange=Major, yellow=Minor)
+- Expandable details showing explanation and suggestions
+- Educational tooltips with definitions and examples
+
+## Related
+
+- [Argument Node Schema](/api/schemas/argument-node) - includes `fallacies` field
+- [Blueprint Output Schema](/api/schemas/blueprint-output)
+- [Identify Fallacies Flow](/api/flows/identify-fallacies)
+- [Explain Fallacy Flow](/api/flows/explain-fallacy)

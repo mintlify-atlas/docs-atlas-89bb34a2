@@ -1,0 +1,430 @@
+---
+title: Visualization Modes
+description: Comprehensive guide to all 6 argument visualization modes and when to use each one
+---
+
+## Overview
+
+Argument Cartographer offers 6 distinct visualization modes, each optimized for different analytical needs. Mastering these views enables you to explore arguments from multiple perspectives and find insights that might be hidden in a single representation.
+
+<Info>
+  **Quick Tip:** You can switch between modes instantly using the view selector in the toolbar. Your data doesn't change - only how it's visualized.
+</Info>
+
+## Mode Selector
+
+The toolbar at the top of every analysis contains the view mode selector:
+
+<CodeGroup>
+```tsx View Mode Toolbar
+const viewModes = [
+  { id: 'balanced', label: 'Balanced', icon: ScaleBalanced },
+  { id: 'tree', label: 'Tree', icon: GitBranch },
+  { id: 'pillar', label: 'Pillar', icon: Columns },
+  { id: 'circular', label: 'Circular', icon: CircleDot },
+  { id: 'flowchart', label: 'Flow', icon: Workflow },
+  { id: 'compass', label: 'Compass', icon: Compass },
+];
+```
+</CodeGroup>
+
+## Mode 1: Flow View
+
+Classical argument diagram with vertical logical progression.
+
+### Layout Structure
+
+<Steps>
+  <Step title="Thesis (Top)">
+    Central contention displayed in dark slate box at top center
+  </Step>
+  
+  <Step title="Distribution Line">
+    Horizontal line splitting into two lanes
+  </Step>
+  
+  <Step title="Left Lane: Supporting Reasons">
+    Green-coded claims arguing FOR the thesis, stacked vertically
+  </Step>
+  
+  <Step title="Right Lane: Objections">
+    Red-coded counterclaims arguing AGAINST, stacked vertically
+  </Step>
+  
+  <Step title="Evidence Nodes">
+    Smaller nodes attached below each claim/counterclaim
+  </Step>
+  
+  <Step title="Conclusion (Bottom)">
+    Summary of analysis displayed in gray box
+  </Step>
+</Steps>
+
+### When to Use Flow View
+
+<Tabs>
+  <Tab title="Best For">
+    - **Understanding progression:** How arguments build from thesis to conclusion
+    - **Presentations:** Clean, professional look for slides
+    - **Academic analysis:** Mimics Toulmin argument diagrams
+    - **First-time viewers:** Most intuitive for new users
+  </Tab>
+  
+  <Tab title="Advantages">
+    - Clear visual hierarchy
+    - Easy to follow logical flow
+    - Symmetrical layout (balanced aesthetics)
+    - Excellent for export/printing
+  </Tab>
+  
+  <Tab title="Limitations">
+    - Vertical scrolling required for complex arguments
+    - Doesn't show strength/quantity differences well
+    - Evidence nodes can feel cramped
+  </Tab>
+</Tabs>
+
+### Visual Example
+
+```
+┌────────────────────────────────┐
+│   THESIS: Central Claim Here   │
+└────────────────┬───────────────┘
+                 │
+        ┌────────┴────────┐
+        │                 │
+  ┌─────▼─────┐     ┌─────▼─────┐
+  │ Supporting │     │ Objections │
+  │  Reasons   │     │  &Rebuttals│
+  └─────┬──────┘     └─────┬─────┘
+        │                  │
+    [Evidence]        [Evidence]
+        │                  │
+        └─────────┬────────┘
+              ┌───▼────┐
+              │Conclusion│
+              └────────┘
+```
+
+## Mode 2: Balanced View
+
+Side-by-side comparison with split layout.
+
+### Layout Structure
+
+- **Left Column:** All "FOR" arguments (green theme)
+- **Right Column:** All "AGAINST" arguments (red theme)
+- **Top Banner:** Thesis spans both columns
+- **Vertical Alignment:** Claims attempt to align by topic where possible
+
+### When to Use Balanced View
+
+<Tabs>
+  <Tab title="Best For">
+    - **Weighing pros and cons:** Direct visual comparison
+    - **Decision-making:** See both sides simultaneously
+    - **Debate preparation:** Understand opposition arguments
+    - **Quick scanning:** Assess argument balance at a glance
+  </Tab>
+  
+  <Tab title="Advantages">
+    - Immediate sense of balance/imbalance
+    - No need to scroll between opposing views
+    - Good for comparative strength assessment
+    - Works well on wide screens
+  </Tab>
+  
+  <Tab title="Limitations">
+    - Requires horizontal space (poor on mobile)
+    - Can feel cluttered with many arguments
+    - Doesn't show claim-evidence relationships clearly
+  </Tab>
+</Tabs>
+
+### Implementation Detail
+
+<CodeGroup>
+```tsx Balanced View Filtering
+const forArguments = blueprint.filter(node => 
+  (node.type === 'claim' || node.type === 'evidence') && 
+  node.side === 'for'
+);
+
+const againstArguments = blueprint.filter(node => 
+  (node.type === 'claim' || node.type === 'evidence') && 
+  node.side === 'against'
+);
+
+return (
+  <div className="grid grid-cols-2 gap-8">
+    <div className="for-column">
+      {forArguments.map(node => <ArgumentCard node={node} />)}
+    </div>
+    <div className="against-column">
+      {againstArguments.map(node => <ArgumentCard node={node} />)}
+    </div>
+  </div>
+);
+```
+</CodeGroup>
+
+## Mode 3: Tree View
+
+Hierarchical tree structure showing parent-child relationships.
+
+### Layout Structure
+
+- **Root Node:** Thesis at top
+- **Branches:** Claims extend rightward/downward
+- **Leaves:** Evidence nodes at terminals
+- **Indentation:** Depth indicated by left padding
+
+### When to Use Tree View
+
+<Tabs>
+  <Tab title="Best For">
+    - **Tracing lineage:** Follow specific argument chains
+    - **Complex arguments:** Deep nesting of sub-claims
+    - **Academic research:** Traditional outline-style thinking
+    - **Finding gaps:** Spot claims without evidence
+  </Tab>
+  
+  <Tab title="Advantages">
+    - Clear parent-child relationships
+    - Expandable/collapsible branches (future feature)
+    - Familiar structure (like file trees)
+    - Good for deep, narrow arguments
+  </Tab>
+  
+  <Tab title="Limitations">
+    - Can become very tall (lots of scrolling)
+    - Doesn't emphasize opposition well
+    - Visual monotony for broad, shallow arguments
+  </Tab>
+</Tabs>
+
+## Mode 4: Compass View
+
+Circular layout with thesis at center, claims radiating outward.
+
+### Layout Structure
+
+- **Center Circle:** Thesis (large)
+- **Inner Ring:** Claims positioned by angle
+  - 0-180°: "For" arguments (top half, green)
+  - 180-360°: "Against" arguments (bottom half, red)
+- **Outer Ring:** Evidence nodes (smaller, connected by lines)
+
+### When to Use Compass View
+
+<Tabs>
+  <Tab title="Best For">
+    - **Big picture:** See entire debate at once
+    - **Spatial thinkers:** Visual/spatial learning style
+    - **Brainstorming:** Identify missing argument angles
+    - **Pattern recognition:** Spot clustering of argument types
+  </Tab>
+  
+  <Tab title="Advantages">
+    - Unique, engaging visual
+    - No scrolling (fits on one screen)
+    - Clear thesis centrality
+    - Good for screenshots/sharing
+  </Tab>
+  
+  <Tab title="Limitations">
+    - Text can overlap if too many nodes
+    - Harder to read long claim text
+    - Less conventional (learning curve)
+    - Poor for very detailed analysis
+  </Tab>
+</Tabs>
+
+### Mathematical Layout
+
+<CodeGroup>
+```typescript Polar Coordinate Positioning
+const angleStep = (2 * Math.PI) / totalClaims;
+const radius = 300; // pixels from center
+
+claims.forEach((claim, index) => {
+  const angle = (index * angleStep) + (claim.side === 'against' ? Math.PI : 0);
+  
+  const x = centerX + radius * Math.cos(angle);
+  const y = centerY + radius * Math.sin(angle);
+  
+  return { x, y, angle };
+});
+```
+</CodeGroup>
+
+## Mode 5: Circular View
+
+3D flip cards arranged in circular pattern for interactive exploration.
+
+### Layout Structure
+
+- **Circular Arrangement:** Cards positioned in circle
+- **3D Perspective:** CSS `transform-style: preserve-3d`
+- **Front Face:** Claim summary + icon + score
+- **Back Face:** Full details + evidence + fallacies
+- **Click to Flip:** Interactive card rotation
+
+### When to Use Circular View
+
+<Tabs>
+  <Tab title="Best For">
+    - **Presentations:** Wow factor for audiences
+    - **Interactive exploration:** Engaging, game-like experience
+    - **Summarizing:** Quick overview with drill-down
+    - **Teaching:** Makes arguments memorable
+  </Tab>
+  
+  <Tab title="Advantages">
+    - Most visually engaging
+    - Fun to interact with
+    - Good information hierarchy (summary → detail)
+    - Memorable visual format
+  </Tab>
+  
+  <Tab title="Limitations">
+    - Not suitable for detailed analysis
+    - Requires user interaction (not passive)
+    - Can be gimmicky for serious research
+    - Limited cards shown at once (scrolling required)
+  </Tab>
+</Tabs>
+
+### Implementation
+
+<CodeGroup>
+```tsx Flip Card Animation
+<motion.div
+  className="card-container perspective-1000"
+  onClick={() => setIsFlipped(!isFlipped)}
+>
+  <motion.div
+    className="card"
+    animate={{ rotateY: isFlipped ? 180 : 0 }}
+    transition={{ duration: 0.6, ease: 'easeInOut' }}
+    style={{ transformStyle: 'preserve-3d' }}
+  >
+    {/* Front */}
+    <div className="card-face front backface-hidden">
+      <h3>{claim.content.substring(0, 50)}...</h3>
+      <Badge>Click to flip</Badge>
+    </div>
+    
+    {/* Back */}
+    <div className="card-face back backface-hidden rotateY-180">
+      <p>{claim.content}</p>
+      <p className="text-xs">{claim.sourceText}</p>
+      {claim.fallacies.map(f => <FallacyBadge />)}
+    </div>
+  </motion.div>
+</motion.div>
+```
+</CodeGroup>
+
+## Mode 6: Pillar View
+
+Vertical columns maximizing information density.
+
+### Layout Structure
+
+- **Two Columns:** Side-by-side
+- **Left Pillar:** Supporting arguments (green header)
+- **Right Pillar:** Opposing arguments (red header)
+- **Compact Cards:** Minimal spacing, small fonts
+- **Stacked Vertically:** Claims flow top to bottom
+
+### When to Use Pillar View
+
+<Tabs>
+  <Tab title="Best For">
+    - **Printing:** Fits more content per page
+    - **Dense information:** When you need to see everything
+    - **Academic papers:** Formal, space-efficient
+    - **Quick reference:** Maximum info, minimum chrome
+  </Tab>
+  
+  <Tab title="Advantages">
+    - Highest information density
+    - Good for printing/PDFs
+    - Easy to scan quickly
+    - Works on medium-width screens
+  </Tab>
+  
+  <Tab title="Limitations">
+    - Can feel overwhelming
+    - Less visual hierarchy
+    - Not engaging for presentations
+    - Poor on mobile devices
+  </Tab>
+</Tabs>
+
+## Switching Between Modes
+
+### Toolbar Navigation
+
+<CodeGroup>
+```tsx View Mode Selector
+<div className="view-mode-selector">
+  {viewModes.map(mode => (
+    <Button
+      key={mode.id}
+      variant={currentView === mode.id ? 'default' : 'ghost'}
+      onClick={() => setViewMode(mode.id)}
+      className="flex items-center gap-2"
+    >
+      <mode.icon className="h-4 w-4" />
+      <span className="hidden md:inline">{mode.label}</span>
+    </Button>
+  ))}
+</div>
+```
+</CodeGroup>
+
+### Keyboard Shortcuts (Future)
+
+Planned keyboard navigation:
+
+- **1-6 keys:** Quick jump to mode
+- **Tab:** Cycle through modes
+- **Ctrl+E:** Export current view
+
+## Choosing the Right Mode
+
+<Steps>
+  <Step title="Start with Flow">
+    Default view provides good overview for most topics
+  </Step>
+  
+  <Step title="Compare in Balanced">
+    Switch to Balanced to directly compare strength of each side
+  </Step>
+  
+  <Step title="Deep Dive in Tree">
+    Use Tree to trace specific argument chains
+  </Step>
+  
+  <Step title="Share in Compass or Circular">
+    Choose engaging views for presentations
+  </Step>
+  
+  <Step title="Print in Pillar">
+    Use Pillar for maximum density in documents
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Exporting Results" icon="download" href="/guides/exporting-results">
+    Learn to export views as images or data
+  </Card>
+  
+  <Card title="Argument Mapping" icon="diagram-project" href="/features/argument-mapping">
+    Understand the underlying node structure
+  </Card>
+</CardGroup>

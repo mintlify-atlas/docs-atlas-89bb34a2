@@ -1,0 +1,322 @@
+---
+title: 'Environment Variables'
+description: 'Complete reference for configuring Argument Cartographer environment variables'
+icon: 'key'
+---
+
+## Overview
+
+Argument Cartographer requires multiple environment variables for AI services, external APIs, and Firebase configuration. This guide provides a complete reference extracted from the actual codebase.
+
+<Warning>
+  Never commit `.env` files to version control. Use Vercel's environment variable settings for production deployments.
+</Warning>
+
+## Environment File Structure
+
+Create a `.env` file in your project root:
+
+```bash .env
+# AI Configuration
+GOOGLE_GENAI_API_KEY=your_gemini_key_here
+
+# External Tools
+FIRECRAWL_API_KEY=your_firecrawl_key_here
+TWITTER_BEARER_TOKEN=your_twitter_bearer_token_here
+
+# Firebase Client Config (Public)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+# Firebase Admin Config (Server-side)
+SERVICE_ACCOUNT_PROJECT_ID=your_project_id
+SERVICE_ACCOUNT_CLIENT_EMAIL=firebase-adminsdk@your_project.iam.gserviceaccount.com
+SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour_Private_Key_Here\n-----END PRIVATE KEY-----\n"
+```
+
+## Variable Reference
+
+### AI Configuration
+
+<ParamField path="GOOGLE_GENAI_API_KEY" type="string" required>
+  **Google Gemini API Key** for AI-powered argument analysis.
+  
+  - **Used in**: All AI flows (blueprint generation, fallacy detection, summarization)
+  - **Model**: Gemini 1.5 Pro
+  - **Get key**: [Google AI Studio](https://makersuite.google.com/app/apikey)
+  
+  <Warning>
+    The application requires a valid API key. Missing or invalid keys will cause all AI flows to fail.
+  </Warning>
+</ParamField>
+
+### External API Tools
+
+<ParamField path="FIRECRAWL_API_KEY" type="string" required>
+  **Firecrawl API Key** for web scraping and search functionality.
+  
+  - **Used in**: `web-search.ts`, `web-scraper.ts`
+  - **Purpose**: Scrapes article content and performs web searches
+  - **Limit**: 20 results per search, 20,000 characters per scrape
+  - **Get key**: [Firecrawl](https://firecrawl.dev)
+  
+  **Error handling**:
+  ```typescript
+  if (!firecrawlKey || firecrawlKey === 'YOUR_API_KEY_HERE') {
+    throw new Error('Firecrawl API key not configured. Please set FIRECRAWL_API_KEY in .env');
+  }
+  ```
+  
+  <Info>
+    If Firecrawl fails or credits are depleted, the application falls back to using user query only with limited analysis mode.
+  </Info>
+</ParamField>
+
+<ParamField path="TWITTER_BEARER_TOKEN" type="string" required>
+  **Twitter API v2 Bearer Token** for social media sentiment analysis.
+  
+  - **Used in**: `twitter-search.ts` for Social Pulse feature
+  - **Query format**: `{query} lang:en -is:retweet`
+  - **Max results**: 20 tweets, sorted by relevancy
+  - **Get token**: [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
+  
+  **Required expansions**:
+  - `author_id` - Get full user objects
+  - `tweet.fields`: `created_at`, `author_id`, `public_metrics`
+  - `user.fields`: `profile_image_url`, `username`, `name`
+  
+  <Note>
+    Twitter search failures are non-fatal. The application continues without social pulse data if the API fails.
+  </Note>
+</ParamField>
+
+### Firebase Client Configuration
+
+These variables are **public** (prefixed with `NEXT_PUBLIC_`) and exposed to the browser:
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_API_KEY" type="string" required>
+  Firebase Web API key for client-side authentication.
+  
+  **Location**: Firebase Console → Project Settings → General → Web API Key
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN" type="string" required>
+  Firebase authentication domain.
+  
+  **Format**: `{project-id}.firebaseapp.com`
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_PROJECT_ID" type="string" required>
+  Unique Firebase project identifier.
+  
+  **Used in**: Client SDK initialization, Firestore paths
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET" type="string" required>
+  Firebase Storage bucket name.
+  
+  **Format**: `{project-id}.appspot.com`
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID" type="string" required>
+  Firebase Cloud Messaging sender ID for push notifications.
+</ParamField>
+
+<ParamField path="NEXT_PUBLIC_FIREBASE_APP_ID" type="string" required>
+  Unique Firebase app identifier.
+  
+  **Format**: `1:xxxxx:web:xxxxxx`
+</ParamField>
+
+### Firebase Admin Configuration
+
+These variables are **private** (server-side only) and used for admin operations:
+
+<ParamField path="SERVICE_ACCOUNT_PROJECT_ID" type="string" required>
+  Firebase project ID for admin SDK.
+  
+  **Must match**: `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+</ParamField>
+
+<ParamField path="SERVICE_ACCOUNT_CLIENT_EMAIL" type="string" required>
+  Service account email for Firebase Admin SDK.
+  
+  **Format**: `firebase-adminsdk-{id}@{project-id}.iam.gserviceaccount.com`
+  
+  **Location**: Firebase Console → Project Settings → Service Accounts → Generate new private key
+</ParamField>
+
+<ParamField path="SERVICE_ACCOUNT_PRIVATE_KEY" type="string" required>
+  Service account private key for server-side Firebase operations.
+  
+  **Format**: Must be enclosed in double quotes with escaped newlines:
+  ```
+  "-----BEGIN PRIVATE KEY-----\nYour_Key_Here\n-----END PRIVATE KEY-----\n"
+  ```
+  
+  <Warning>
+    **Critical Security Note**: 
+    - Keep this key secret and never expose it in client-side code
+    - In Vercel, paste the entire key including quotes and newlines
+    - Rotation recommended every 90 days
+  </Warning>
+</ParamField>
+
+## Validation and Error Handling
+
+The application validates environment variables at runtime:
+
+### API Key Validation
+
+```typescript
+// Firecrawl validation (web-search.ts:55-59)
+if (!firecrawlKey || firecrawlKey === 'YOUR_API_KEY_HERE') {
+  throw new Error('Firecrawl API key not configured. Please set FIRECRAWL_API_KEY in .env');
+}
+
+// Twitter validation (twitter-search.ts:46-50)
+if (!bearerToken || bearerToken === 'YOUR_BEARER_TOKEN_HERE') {
+  throw new Error('TWITTER_BEARER_TOKEN is not configured. Please add it to your .env file.');
+}
+```
+
+### Fallback Behavior
+
+<AccordionGroup>
+  <Accordion title="Firecrawl API Failure">
+    When Firecrawl API fails or credits are depleted:
+    
+    1. Application attempts fallback to general search without site filtering
+    2. If all scraping fails, uses search snippets as context
+    3. If search also fails, enters **limited analysis mode** using only the user query
+    
+    ```typescript
+    // From generate-argument-blueprint.ts:242-253
+    console.warn("[Flow] No external sources available (API credits may be depleted). Using user query only.");
+    isLimitedAnalysis = true;
+    context = `
+    --- USER QUERY (No External Sources Available) ---
+    Topic: ${input.input}
+    
+    NOTE: External search APIs are unavailable. Generate an analysis based solely on your training knowledge about this topic.
+    `;
+    ```
+  </Accordion>
+
+  <Accordion title="Twitter API Failure">
+    Twitter search failures are non-fatal:
+    
+    ```typescript
+    // From generate-argument-blueprint.ts:337-339
+    catch (error: any) {
+      console.error("Twitter search failed, continuing. Error:", error.message);
+    }
+    ```
+    
+    The application continues without social pulse data and returns an empty tweets array.
+  </Accordion>
+</AccordionGroup>
+
+## Security Best Practices
+
+<Steps>
+  <Step title="Never Commit Secrets">
+    Add `.env` to `.gitignore`:
+    
+    ```bash .gitignore
+    .env
+    .env.local
+    .env*.local
+    ```
+  </Step>
+
+  <Step title="Use Vercel Environment Variables">
+    For production, add variables in:
+    
+    **Vercel Dashboard** → **Project Settings** → **Environment Variables**
+    
+    Set scope:
+    - **Production**: Live environment
+    - **Preview**: Pull request previews
+    - **Development**: Local development (optional)
+  </Step>
+
+  <Step title="Rotate Keys Regularly">
+    - Firebase service account keys: Every 90 days
+    - API keys: When team members leave
+    - Immediately if keys are exposed
+  </Step>
+
+  <Step title="Use Separate Environments">
+    Maintain separate Firebase projects and API keys for:
+    - Development
+    - Staging
+    - Production
+  </Step>
+</Steps>
+
+## Testing Configuration
+
+Verify your environment variables are loaded correctly:
+
+```typescript
+// Check if variables are available
+console.log('Firebase Config:', {
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  hasApiKey: !!process.env.GOOGLE_GENAI_API_KEY,
+  hasFirecrawl: !!process.env.FIRECRAWL_API_KEY,
+  hasTwitter: !!process.env.TWITTER_BEARER_TOKEN,
+});
+```
+
+<Warning>
+  Never log actual API keys or secrets to the console in production.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Environment variables not loading in Vercel">
+    **Solution**:
+    1. Verify variables are added in Vercel dashboard
+    2. Check variable scope (Production/Preview/Development)
+    3. Redeploy after adding new variables
+    4. Ensure `NEXT_PUBLIC_` prefix for client-side variables
+  </Accordion>
+
+  <Accordion title="Firebase authentication not working">
+    **Check**:
+    - All 6 `NEXT_PUBLIC_FIREBASE_*` variables are set
+    - Auth domain matches Firebase console
+    - Service account private key format (escaped newlines)
+  </Accordion>
+
+  <Accordion title="API calls failing with 401/403 errors">
+    **Check**:
+    - API keys are valid and not expired
+    - Keys don't have placeholder values like `YOUR_API_KEY_HERE`
+    - Billing is enabled for paid APIs
+    - Rate limits not exceeded
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Firebase Setup" icon="fire" href="/deployment/firebase-setup">
+    Configure Firebase project and security rules
+  </Card>
+  <Card title="Vercel Deployment" icon="cloud" href="/deployment/vercel">
+    Deploy your application to production
+  </Card>
+  <Card title="API Errors" icon="bug" href="/troubleshooting/api-errors">
+    Debug API integration issues
+  </Card>
+  <Card title="Common Issues" icon="triangle-exclamation" href="/troubleshooting/common-issues">
+    Resolve common deployment problems
+  </Card>
+</CardGroup>

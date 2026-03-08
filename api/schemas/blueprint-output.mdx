@@ -1,0 +1,223 @@
+---
+title: 'Blueprint Output Schema'
+description: 'Complete output structure from argument blueprint generation'
+icon: 'file-code'
+---
+
+## Overview
+
+The `GenerateArgumentBlueprintOutput` schema defines the complete output from the `generateArgumentBlueprint` flow. It contains the argument blueprint, analysis, social pulse, and detected fallacies.
+
+This is the primary data structure used throughout Argument Cartographer.
+
+## Schema Definition
+
+```typescript
+const GenerateArgumentBlueprintOutputSchema = z.object({
+  blueprint: z.array(ArgumentNodeSchema).describe('A structured JSON blueprint of the arguments.'),
+  summary: z.string().describe("A concise, neutral summary of the overall state of the debate."),
+  analysis: z.string().describe("AI-driven meta-analysis providing novel insights, identifying emerging themes, logical gaps, or the overall state of the debate."),
+  credibilityScore: z.number().min(1).max(10).describe("A score from 1-10 rating the overall quality, diversity, and reliability of the sources found."),
+  brutalHonestTake: z.string().describe("A candid, slightly cynical, 'no-BS' summary of the situation, written in simple, conversational language."),
+  keyPoints: z.array(z.string()).describe("A list of 3-5 key takeaways or summary points."),
+  socialPulse: z.string().describe("A summary of the public sentiment and key discussion points on the topic from social media platform X (Twitter)."),
+  tweets: z.array(TweetSchema).describe('An array of relevant tweets from X/Twitter.'),
+  fallacies: z.array(DetectedFallacySchema).optional().describe('An array of logical fallacies detected in the source material.'),
+});
+
+type GenerateArgumentBlueprintOutput = z.infer<typeof GenerateArgumentBlueprintOutputSchema>;
+```
+
+**Source:** `src/ai/flows/generate-argument-blueprint.ts:77`
+
+## Fields
+
+### Core Analysis
+
+<ResponseField name="blueprint" type="ArgumentNode[]" required>
+  A structured JSON blueprint of the arguments.
+  
+  Array of argument nodes forming a tree structure. See [Argument Node Schema](/api/schemas/argument-node).
+</ResponseField>
+
+<ResponseField name="summary" type="string" required>
+  A concise, neutral summary of the overall state of the debate.
+  
+  Typically 2-4 paragraphs providing an objective overview.
+</ResponseField>
+
+<ResponseField name="analysis" type="string" required>
+  AI-driven meta-analysis providing novel insights, identifying emerging themes, logical gaps, or the overall state of the debate.
+  
+  Deeper analysis than summary, includes:
+  - Emerging themes and patterns
+  - Logical gaps in arguments
+  - Quality of evidence on both sides
+  - State of the debate overall
+</ResponseField>
+
+### Quality Metrics
+
+<ResponseField name="credibilityScore" type="number" required>
+  A score from 1-10 rating the overall quality, diversity, and reliability of the sources found.
+  
+  Factors considered:
+  - Source diversity (number of unique outlets)
+  - Source reputation (trusted vs unknown)
+  - Evidence quality (primary vs secondary sources)
+  - Balanced coverage (both sides represented)
+</ResponseField>
+
+### Additional Insights
+
+<ResponseField name="brutalHonestTake" type="string" required>
+  A candid, slightly cynical, "no-BS" summary of the situation, written in simple, conversational language.
+  
+  Example: "Look, both sides have points, but most of the debate is just people yelling past each other. The real issue is [X], but nobody wants to talk about that."
+</ResponseField>
+
+<ResponseField name="keyPoints" type="string[]" required>
+  A list of 3-5 key takeaways or summary points.
+  
+  Bullet-point style insights that capture the essence of the debate.
+</ResponseField>
+
+### Social Context
+
+<ResponseField name="socialPulse" type="string" required>
+  A summary of the public sentiment and key discussion points on the topic from social media platform X (Twitter).
+  
+  Generated from analyzing recent tweets, written in a "Grok-style" conversational tone.
+</ResponseField>
+
+<ResponseField name="tweets" type="Tweet[]" required>
+  An array of relevant tweets from X/Twitter (up to 5 tweets).
+  
+  Sorted by engagement (like count). Each tweet includes:
+  - `id`: Tweet ID
+  - `text`: Full tweet text
+  - `author`: Author details (name, username, profile image)
+  - `created_at`: Timestamp
+  - `public_metrics`: Engagement metrics (likes, retweets, replies, impressions)
+</ResponseField>
+
+### Fallacy Detection
+
+<ResponseField name="fallacies" type="DetectedFallacy[]">
+  An array of logical fallacies detected in the source material.
+  
+  Optional field. See [Fallacy Detection Schema](/api/schemas/fallacy-detection) for structure.
+</ResponseField>
+
+## Example Output
+
+```json
+{
+  "blueprint": [
+    {
+      "id": "1",
+      "parentId": null,
+      "type": "thesis",
+      "side": "for",
+      "content": "Should governments implement carbon taxes?",
+      "sourceText": "User query",
+      "source": "https://user-input.local/query",
+      "fallacies": [],
+      "logicalRole": "Central debate question"
+    },
+    {
+      "id": "2",
+      "parentId": "1",
+      "type": "claim",
+      "side": "for",
+      "content": "Carbon taxes effectively reduce emissions",
+      "sourceText": "Countries with carbon taxes saw 15% emission reduction...",
+      "source": "https://example.com/study",
+      "fallacies": [],
+      "logicalRole": "Primary economic argument"
+    }
+  ],
+  "summary": "The debate over carbon taxes centers on economic vs environmental priorities...",
+  "analysis": "What emerges from the sources is a fundamental tension between short-term economic concerns and long-term environmental sustainability...",
+  "credibilityScore": 7,
+  "brutalHonestTake": "Both sides cherry-pick data to support their position. The real question isn't whether carbon taxes work, but whether we have the political will to implement them properly.",
+  "keyPoints": [
+    "Carbon taxes have proven effective in some countries",
+    "Implementation varies widely affecting outcomes",
+    "Economic impact depends on how revenue is used",
+    "Political feasibility remains the biggest challenge"
+  ],
+  "socialPulse": "Twitter discourse is predictably polarized. Environmental advocates tout success stories while critics focus on economic hardship. Few nuanced takes.",
+  "tweets": [
+    {
+      "id": "1234567890",
+      "text": "Carbon taxes work. Just look at Sweden's emissions...",
+      "author": {
+        "name": "Climate Analyst",
+        "username": "climate_data",
+        "profile_image_url": "https://..."
+      },
+      "created_at": "2024-03-08T12:00:00Z",
+      "public_metrics": {
+        "retweet_count": 45,
+        "reply_count": 12,
+        "like_count": 230,
+        "impression_count": 5600
+      }
+    }
+  ],
+  "fallacies": [
+    {
+      "id": "f1",
+      "name": "Appeal to Emotion",
+      "severity": "Major",
+      "category": "Emotional Fallacy",
+      "confidence": 0.9,
+      "problematicText": "This tax will destroy families...",
+      "explanation": "Uses emotional language without supporting evidence",
+      "definition": "Appeal to Emotion manipulates emotions rather than using logic",
+      "avoidance": "Focus on evidence-based arguments",
+      "example": "Instead of 'this will destroy families', say 'data shows economic impact of X%'",
+      "suggestion": "Replace emotional claims with specific economic data",
+      "location": "Node 3"
+    }
+  ]
+}
+```
+
+## Usage
+
+This output is used throughout the application:
+
+- **Visualization**: Blueprint rendered in various graph layouts
+- **Analysis Display**: Summary and analysis shown to users
+- **Quality Indicator**: Credibility score displayed
+- **Social Context**: Social pulse and tweets provide public sentiment
+- **Fallacy Highlighting**: Detected fallacies marked in UI
+- **Chat Context**: Full output passed to Ask More flow
+
+## Validation
+
+The schema enforces:
+
+- `blueprint` must be a non-empty array
+- `credibilityScore` must be between 1 and 10
+- `keyPoints` should contain 3-5 items (recommended)
+- `tweets` limited to 5 items in practice
+- All required fields must be present
+
+## Post-Processing
+
+The flow applies these transformations:
+
+- **Credibility Score**: Converts decimal (0.9) to 1-10 scale (9) if needed
+- **Source URLs**: Replaces "null" strings with placeholder URLs
+- **Parent IDs**: Converts "null" strings to actual `null`
+- **Tweet Sorting**: Sorts by like count before limiting to 5
+
+## Related
+
+- [Argument Node Schema](/api/schemas/argument-node)
+- [Fallacy Detection Schema](/api/schemas/fallacy-detection)
+- [Generate Blueprint Flow](/api/flows/generate-blueprint)
+- [Ask More Flow](/api/flows/ask-more) - uses this output as context

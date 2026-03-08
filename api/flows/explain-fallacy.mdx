@@ -1,0 +1,127 @@
+---
+title: 'Explain Logical Fallacy'
+description: 'Get detailed explanations for specific logical fallacies'
+icon: 'book-open'
+---
+
+## Overview
+
+The `explainLogicalFallacy` flow provides a clear, detailed explanation of a specific logical fallacy, including its definition and a simple example.
+
+This flow is useful for educational purposes and helping users understand why certain arguments are fallacious.
+
+## Function Signature
+
+```typescript
+export async function explainLogicalFallacy(
+  input: ExplainLogicalFallacyInput
+): Promise<ExplainLogicalFallacyOutput>
+```
+
+**Source:** `src/ai/flows/explain-logical-fallacy.ts:23`
+
+## Input Schema
+
+<ParamField path="fallacyName" type="string" required>
+  The name of the logical fallacy to explain (e.g., "Ad Hominem", "Straw Man", "False Dichotomy").
+</ParamField>
+
+### Input Type
+
+```typescript
+const ExplainLogicalFallacyInputSchema = z.object({
+  fallacyName: z.string().describe('The name of the logical fallacy to explain.'),
+});
+
+type ExplainLogicalFallacyInput = z.infer<typeof ExplainLogicalFallacyInputSchema>;
+```
+
+## Output Schema
+
+<ResponseField name="explanation" type="string" required>
+  A detailed explanation of the logical fallacy, including what it is and a simple example.
+</ResponseField>
+
+### Output Type
+
+```typescript
+const ExplainLogicalFallacyOutputSchema = z.object({
+  explanation: z.string().describe('A detailed explanation of the logical fallacy.'),
+});
+
+type ExplainLogicalFallacyOutput = z.infer<typeof ExplainLogicalFallacyOutputSchema>;
+```
+
+## Example Usage
+
+```typescript
+import { explainLogicalFallacy } from '@/ai/flows/explain-logical-fallacy';
+
+const result = await explainLogicalFallacy({
+  fallacyName: 'Ad Hominem'
+});
+
+console.log(result.explanation);
+/* Output:
+An Ad Hominem fallacy occurs when someone attacks the person making an argument 
+rather than addressing the argument itself. This is a logical error because the 
+validity of an argument does not depend on the character of the person presenting it.
+
+Example: "You can't trust John's opinion on climate change because he failed 
+math in high school." This attacks John's credentials rather than evaluating 
+the actual climate change argument.
+*/
+```
+
+## Common Fallacy Names
+
+You can request explanations for any recognized logical fallacy, including:
+
+- Ad Hominem
+- Straw Man
+- False Dichotomy (False Dilemma)
+- Appeal to Authority
+- Appeal to Emotion
+- Slippery Slope
+- Circular Reasoning (Begging the Question)
+- Hasty Generalization
+- Red Herring
+- Tu Quoque (Whataboutism)
+- No True Scotsman
+- Appeal to Nature
+- Bandwagon (Ad Populum)
+- Post Hoc Ergo Propter Hoc
+- And many more...
+
+## Implementation Details
+
+The flow uses an expert prompt to generate clear, educational explanations:
+
+**Prompt Template** (from `src/ai/flows/explain-logical-fallacy.ts:33`):
+
+```
+You are an expert in logic and rhetoric. Provide a clear, concise explanation 
+for the following logical fallacy: {fallacyName}.
+
+Explain what the fallacy is and provide a simple example.
+```
+
+The AI is instructed to:
+- Define the fallacy clearly
+- Explain why it's a logical error
+- Provide a concrete, easy-to-understand example
+- Use accessible language suitable for general audiences
+
+## Use Cases
+
+- **Educational Tooltips**: Explain fallacies when detected in arguments
+- **User Guidance**: Help users understand why their arguments may be flawed
+- **Fallacy Library**: Build a comprehensive fallacy reference
+- **Interactive Learning**: Create quizzes and learning modules
+- **Argument Improvement**: Provide suggestions for stronger reasoning
+
+## Related
+
+- [Identify Logical Fallacies Flow](/api/flows/identify-fallacies)
+- [Fallacy Detection Schema](/api/schemas/fallacy-detection)
+- [Generate Blueprint Flow](/api/flows/generate-blueprint) - includes fallacy detection and explanation

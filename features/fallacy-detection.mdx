@@ -1,0 +1,500 @@
+---
+title: Fallacy Detection
+description: Automated identification and categorization of logical fallacies in arguments with educational explanations
+---
+
+## Overview
+
+Fallacy Detection is one of the most powerful features of Argument Cartographer. Our AI actively scans source material for logical errors and rhetorical manipulation, educating users not just on *what* is being said, but *how* they might be misled.
+
+<Info>
+  The system identifies **15+ common fallacy types** with confidence scoring, severity ratings, and suggested improvements.
+</Info>
+
+## How Fallacy Detection Works
+
+The detection process is integrated directly into the argument analysis pipeline:
+
+<Steps>
+  <Step title="Context Analysis">
+    Gemini 1.5 Pro reads all scraped source material (up to 20,000 tokens)
+  </Step>
+  
+  <Step title="Pattern Recognition">
+    AI identifies patterns matching known fallacy structures using trained examples
+  </Step>
+  
+  <Step title="Quote Extraction">
+    System extracts the exact problematic text from sources
+  </Step>
+  
+  <Step title="Confidence Scoring">
+    Each detection receives a 0-100% confidence score based on pattern clarity
+  </Step>
+  
+  <Step title="Severity Classification">
+    Fallacies are rated Critical, Major, or Minor based on impact on argument validity
+  </Step>
+  
+  <Step title="Educational Content Generation">
+    AI generates explanation, definition, and suggested improvements
+  </Step>
+</Steps>
+
+## Detected Fallacy Schema
+
+Each detected fallacy follows this comprehensive structure:
+
+<CodeGroup>
+```typescript DetectedFallacy
+interface DetectedFallacy {
+  id: string; // Unique identifier
+  name: string; // E.g., "Ad Hominem", "Straw Man"
+  severity: 'Critical' | 'Major' | 'Minor';
+  category: string; // "Logical", "Rhetorical", "Statistical"
+  confidence: number; // 0-1 (AI confidence)
+  problematicText: string; // Exact quote
+  explanation: string; // Why it's fallacious
+  definition: string; // Formal definition
+  avoidance: string; // How to avoid
+  example: string; // Clean example
+  suggestion: string; // Improved phrasing
+  location?: string; // Where in argument (e.g., "Claim 3")
+}
+```
+</CodeGroup>
+
+## Common Fallacy Types
+
+### Logical Fallacies
+
+Errors in reasoning structure that invalidate conclusions.
+
+<AccordionGroup>
+  <Accordion title="Ad Hominem - Attack the Person" icon="user-slash">
+    **Definition:** Attacking the character, circumstances, or identity of an individual instead of addressing their argument.
+    
+    **Example:**
+    ```
+    "You can't trust Dr. Smith's climate research - 
+    she drives an SUV!"
+    ```
+    
+    **Why Problematic:** The validity of an argument stands independent of the person making it. A hypocrite can still make a valid point.
+    
+    **How to Avoid:** Focus on the evidence and logic of the argument itself. Address claims, not the claimant.
+    
+    **Suggested Fix:**
+    ```
+    "Dr. Smith's climate research methodology has 
+    limitations because [specific technical reasons]."
+    ```
+    
+    **Severity:** Usually **Major** - Completely sidesteps the actual argument
+  </Accordion>
+  
+  <Accordion title="Straw Man - Misrepresentation" icon="scarecrow">
+    **Definition:** Distorting, exaggerating, or oversimplifying an opponent's position to make it easier to attack.
+    
+    **Example:**
+    ```
+    "Gun control advocates want to ban ALL guns and 
+    leave law-abiding citizens defenseless against criminals."
+    ```
+    
+    **Why Problematic:** Refuting a distorted version doesn't address the actual argument. Most gun control proposals are nuanced, not absolute bans.
+    
+    **How to Avoid:** Steelman instead - represent opposing views in their strongest, most charitable form.
+    
+    **Suggested Fix:**
+    ```
+    "Gun control advocates propose background checks 
+    and assault weapon restrictions, which raises concerns 
+    about [specific legitimate concerns]."
+    ```
+    
+    **Severity:** **Critical** - Fundamentally dishonest argumentation
+  </Accordion>
+  
+  <Accordion title="False Dichotomy - Limited Options" icon="code-branch">
+    **Definition:** Presenting only two options or sides when more alternatives exist.
+    
+    **Example:**
+    ```
+    "Either we cut all social programs or the national 
+    debt will destroy the economy."
+    ```
+    
+    **Why Problematic:** Oversimplifies complex issues and excludes middle-ground solutions like selective cuts, revenue increases, or program reforms.
+    
+    **How to Avoid:** Acknowledge the full spectrum of options and trade-offs.
+    
+    **Suggested Fix:**
+    ```
+    "We have several options for addressing the national 
+    debt: targeted program cuts, revenue increases, 
+    economic growth strategies, or combinations thereof."
+    ```
+    
+    **Severity:** **Major** - Artificially constrains debate
+  </Accordion>
+  
+  <Accordion title="Slippery Slope - Unwarranted Chain Reaction" icon="mountain">
+    **Definition:** Assuming that one action will inevitably lead to a chain of events without providing evidence for the causal links.
+    
+    **Example:**
+    ```
+    "If we legalize same-sex marriage, next people will 
+    want to marry their pets, then inanimate objects!"
+    ```
+    
+    **Why Problematic:** No evidence that legal recognition of one adult consensual relationship leads to fundamentally different scenarios.
+    
+    **How to Avoid:** Provide empirical evidence for each step in the causal chain.
+    
+    **Suggested Fix:**
+    ```
+    "Marriage law changes may have unintended consequences. 
+    Evidence from countries that implemented similar changes 
+    shows [specific documented effects]."
+    ```
+    
+    **Severity:** **Major** - Fearmongering without evidence
+  </Accordion>
+  
+  <Accordion title="Circular Reasoning - Begging the Question" icon="arrows-spin">
+    **Definition:** The conclusion is assumed in one of the premises, creating a logical loop.
+    
+    **Example:**
+    ```
+    "The Bible is true because it's the word of God. 
+    We know it's God's word because the Bible says so."
+    ```
+    
+    **Why Problematic:** Provides no independent verification - assumes what it's trying to prove.
+    
+    **How to Avoid:** Provide independent evidence that doesn't rely on the conclusion.
+    
+    **Suggested Fix:**
+    ```
+    "The Bible's historical claims can be evaluated 
+    through [archaeological evidence, textual analysis, 
+    historical corroboration]."
+    ```
+    
+    **Severity:** **Critical** - Logically invalid
+  </Accordion>
+</AccordionGroup>
+
+### Rhetorical Fallacies
+
+Manipulative persuasion tactics that exploit emotions.
+
+<AccordionGroup>
+  <Accordion title="Appeal to Emotion - Pathos Over Logos" icon="heart">
+    **Definition:** Manipulating emotions instead of providing logical arguments.
+    
+    **Example:**
+    ```
+    "Think of the children! We must ban violent video 
+    games to protect our innocent youth from corruption."
+    ```
+    
+    **Why Problematic:** Emotional appeals can be powerful but don't constitute evidence. Research on media effects is complex and nuanced.
+    
+    **Severity:** **Minor to Major** depending on context
+  </Accordion>
+  
+  <Accordion title="Appeal to Authority - False Expertise" icon="gavel">
+    **Definition:** Citing an authority figure's opinion as evidence when they lack relevant expertise.
+    
+    **Example:**
+    ```
+    "Einstein believed in God, so atheism must be wrong."
+    ```
+    
+    **Why Problematic:** Expertise in physics doesn't transfer to theology. Authority must be relevant to the claim.
+    
+    **Severity:** **Major**
+  </Accordion>
+  
+  <Accordion title="Bandwagon - Appeal to Popularity" icon="users">
+    **Definition:** Arguing something is true or good because many people believe it.
+    
+    **Example:**
+    ```
+    "50 million people can't be wrong - this diet plan 
+    must work!"
+    ```
+    
+    **Why Problematic:** Popularity doesn't equal truth. Many popular beliefs have been false (flat earth, etc.).
+    
+    **Severity:** **Minor to Major**
+  </Accordion>
+</AccordionGroup>
+
+### Statistical Fallacies
+
+Misuse or misrepresentation of data and statistics.
+
+<AccordionGroup>
+  <Accordion title="Cherry Picking - Selective Evidence" icon="hand-pointer">
+    **Definition:** Presenting only data that supports your position while ignoring contradictory evidence.
+    
+    **Example:**
+    ```
+    "Global warming is a hoax - it snowed in Texas 
+    last week!"
+    ```
+    
+    **Why Problematic:** Local weather ≠ global climate. Comprehensive data shows clear warming trends.
+    
+    **Severity:** **Critical** - Deliberately misleading
+  </Accordion>
+  
+  <Accordion title="Hasty Generalization - Insufficient Sample" icon="gauge">
+    **Definition:** Drawing broad conclusions from limited or unrepresentative samples.
+    
+    **Example:**
+    ```
+    "I met two rude French people - the French are rude!"
+    ```
+    
+    **Why Problematic:** Sample size of 2 can't support universal claim about 67 million people.
+    
+    **Severity:** **Major**
+  </Accordion>
+  
+  <Accordion title="Correlation ≠ Causation" icon="chart-line">
+    **Definition:** Assuming that because two things correlate, one must cause the other.
+    
+    **Example:**
+    ```
+    "Ice cream sales and drownings both increase in summer - 
+    ice cream causes drowning!"
+    ```
+    
+    **Why Problematic:** Both are caused by a third factor (hot weather). Correlation requires further investigation.
+    
+    **Severity:** **Major**
+  </Accordion>
+</AccordionGroup>
+
+## Severity Classification
+
+Fallacies are rated on a 3-tier system:
+
+<Tabs>
+  <Tab title="Critical">
+    **Impact:** Completely invalidates the argument
+    
+    **Examples:**
+    - Straw Man
+    - Circular Reasoning
+    - Cherry Picking
+    - Non Sequitur
+    
+    **Visual:** Red badge, highest priority display
+    
+    **Meaning:** The argument cannot be considered valid until this is addressed
+  </Tab>
+  
+  <Tab title="Major">
+    **Impact:** Significantly weakens the argument
+    
+    **Examples:**
+    - Ad Hominem
+    - False Dichotomy
+    - Slippery Slope
+    - Appeal to Authority (irrelevant)
+    
+    **Visual:** Orange badge, high priority
+    
+    **Meaning:** The argument may have merit but needs substantial revision
+  </Tab>
+  
+  <Tab title="Minor">
+    **Impact:** Weakens persuasiveness but doesn't necessarily invalidate logic
+    
+    **Examples:**
+    - Appeal to Emotion (light)
+    - Bandwagon
+    - Anecdotal Evidence
+    
+    **Visual:** Yellow badge, moderate priority
+    
+    **Meaning:** Worth noting but may be acceptable rhetorical flourish in context
+  </Tab>
+</Tabs>
+
+## Confidence Scoring
+
+Each detection includes an AI confidence score:
+
+| Confidence | Interpretation | Action |
+|------------|---------------|--------|
+| 90-100% | Very High | Definitely a fallacy |
+| 70-89% | High | Likely fallacious, worth reviewing |
+| 50-69% | Moderate | Borderline case, context-dependent |
+| 30-49% | Low | Possibly fallacious, may be false positive |
+| 0-29% | Very Low | Likely false positive |
+
+<Tip>
+  Use the confidence filter in the UI to hide low-confidence detections and focus on clear-cut cases.
+</Tip>
+
+## Fallacy Card UI
+
+Fallacies are displayed in expandable cards:
+
+### Collapsed State
+
+- **Severity badge** (colored)
+- **Category tag**
+- **Fallacy name** (bold)
+- **Brief definition** (first sentence only)
+- **Location indicator** (which claim)
+- **Confidence percentage**
+
+### Expanded State
+
+Click to reveal full educational content:
+
+<CodeGroup>
+```tsx Fallacy Card Component
+<FallacyCard fallacy={detectedFallacy}>
+  <Section color="red">
+    <Icon>Quote</Icon>
+    <Title>Problematic Text</Title>
+    <Quote>"{fallacy.problematicText}"</Quote>
+  </Section>
+  
+  <Section color="orange">
+    <Icon>Info</Icon>
+    <Title>Why This Is Problematic</Title>
+    <Text>{fallacy.explanation}</Text>
+  </Section>
+  
+  <Section color="blue">
+    <Icon>Book</Icon>
+    <Title>Definition</Title>
+    <Text>{fallacy.definition}</Text>
+  </Section>
+  
+  <Section color="green">
+    <Icon>Shield</Icon>
+    <Title>How to Avoid</Title>
+    <Text>{fallacy.avoidance}</Text>
+  </Section>
+  
+  <Section color="teal">
+    <Icon>Sparkles</Icon>
+    <Title>Suggested Improvement</Title>
+    <Text>{fallacy.suggestion}</Text>
+  </Section>
+</FallacyCard>
+```
+</CodeGroup>
+
+## Educational Value
+
+Fallacy detection serves a dual purpose:
+
+<CardGroup cols={2}>
+  <Card title="Immediate Analysis" icon="magnifying-glass">
+    Identify weak points in current arguments being analyzed
+  </Card>
+  <Card title="Long-Term Learning" icon="graduation-cap">
+    Build critical thinking skills by seeing examples in real-world context
+  </Card>
+  <Card title="Media Literacy" icon="newspaper">
+    Recognize manipulation tactics in news, advertising, and social media
+  </Card>
+  <Card title="Better Arguments" icon="comments">
+    Improve your own reasoning by learning what to avoid
+  </Card>
+</CardGroup>
+
+## Limitations & Considerations
+
+<Warning>
+  **AI Detection Isn't Perfect:** The system may:
+  - Flag rhetorical flourishes as fallacies (false positives)
+  - Miss subtle logical errors (false negatives)
+  - Misclassify fallacy types
+  - Struggle with sarcasm, irony, and complex context
+</Warning>
+
+### When to Trust Detections
+
+<Steps>
+  <Step title="Check Confidence Score">
+    Focus on 70%+ confidence detections first
+  </Step>
+  
+  <Step title="Read the Context">
+    Click through to source to verify the quote in context
+  </Step>
+  
+  <Step title="Assess Severity">
+    Critical fallacies deserve immediate attention; Minor ones may be acceptable
+  </Step>
+  
+  <Step title="Use Your Judgment">
+    The AI is a tool, not the final authority. Think critically!
+  </Step>
+</Steps>
+
+## Integration with Argument Mapping
+
+Fallacies are linked to specific argument nodes:
+
+<CodeGroup>
+```typescript Node with Fallacies
+const claimNode = {
+  id: "claim-3",
+  content: "Socialism has never worked anywhere...",
+  fallacies: ["hasty-generalization", "no-true-scotsman"],
+  // ... other properties
+};
+```
+</CodeGroup>
+
+**Visual indicators:**
+- ⚠️ Warning icon on nodes with fallacies
+- Fallacy count badge (e.g., "2 fallacies")
+- Click to expand inline fallacy details
+
+## API Access
+
+Developers can use fallacy detection independently:
+
+<CodeGroup>
+```typescript Standalone Fallacy Detection
+import { identifyLogicalFallacies } from '@/ai/flows/identify-logical-fallacies';
+
+const result = await identifyLogicalFallacies({
+  argumentText: "Your argument text here..."
+});
+
+console.log(result.fallacies); // Array of fallacy names
+console.log(result.explanation); // Detailed explanations
+```
+</CodeGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Argument Mapping" icon="diagram-project" href="/features/argument-mapping">
+    See how fallacies integrate with argument visualization
+  </Card>
+  <Card title="Credibility Scoring" icon="chart-line" href="/features/credibility-scoring">
+    Learn how fallacies impact credibility scores
+  </Card>
+  <Card title="Creating Analyses" icon="plus" href="/guides/creating-analysis">
+    Best practices for getting accurate fallacy detection
+  </Card>
+  <Card title="AI Orchestration" icon="brain" href="/architecture/ai-orchestration">
+    Technical details of fallacy detection AI
+  </Card>
+</CardGroup>

@@ -1,0 +1,415 @@
+---
+title: Key Features
+description: Comprehensive overview of Argument Cartographer's core capabilities and unique value propositions
+---
+
+## Interactive Argument Mapping
+
+At the heart of Argument Cartographer is a powerful visualization engine that transforms abstract debates into tangible, navigable maps.
+
+<CardGroup cols={3}>
+  <Card title="Flow View" icon="diagram-project">
+    Classical argument structure with thesis at top, reasons and objections flowing down to conclusion
+  </Card>
+  <Card title="Tree View" icon="tree">
+    Hierarchical tree structure showing parent-child relationships between nodes
+  </Card>
+  <Card title="Compass View" icon="compass">
+    Circular layout with thesis at center, claims radiating outward by side
+  </Card>
+  <Card title="Circular View" icon="circle-nodes">
+    3D flip cards arranged in circular pattern for engaging exploration
+  </Card>
+  <Card title="Pillar View" icon="columns">
+    Side-by-side comparison of "For" and "Against" arguments
+  </Card>
+  <Card title="Balanced View" icon="scale-balanced">
+    Split layout showing supporting vs. opposing evidence
+  </Card>
+</CardGroup>
+
+### Node-Based Navigation
+
+Each argument component is represented as an interactive node:
+
+```typescript
+interface ArgumentNode {
+  id: string;
+  type: 'thesis' | 'claim' | 'counterclaim' | 'evidence';
+  side: 'for' | 'against';
+  content: string;
+  sourceText: string; // Original quote from source
+  source: string; // URL
+  fallacies: string[];
+  logicalRole: string;
+}
+```
+
+<Info>
+  Clicking any node reveals its full context, source attribution, and detected fallacies in a detailed side panel.
+</Info>
+
+## Logical Fallacy Detection
+
+Our AI actively hunts for rhetorical manipulation and logical errors in source material.
+
+### Detected Fallacy Types
+
+<AccordionGroup>
+  <Accordion title="Ad Hominem - Attacking the Person">
+    **Definition:** Attacking the character or circumstances of an individual instead of addressing their argument.
+    
+    **Example:** "You can't trust her climate change research - she drives an SUV!"
+    
+    **Why Problematic:** The validity of an argument stands independent of who makes it.
+  </Accordion>
+  
+  <Accordion title="Straw Man - Misrepresenting Opposition">
+    **Definition:** Distorting or oversimplifying an opponent's position to make it easier to attack.
+    
+    **Example:** "Gun control advocates want to ban all guns and leave citizens defenseless."
+    
+    **Why Problematic:** Refuting a distorted version doesn't address the actual argument.
+  </Accordion>
+  
+  <Accordion title="False Dichotomy - Limited Options">
+    **Definition:** Presenting only two options when more alternatives exist.
+    
+    **Example:** "Either we cut all social programs or the economy will collapse."
+    
+    **Why Problematic:** Oversimplifies complex issues and excludes middle-ground solutions.
+  </Accordion>
+  
+  <Accordion title="Slippery Slope - Chain Reaction">
+    **Definition:** Assuming a chain of events without evidence that one will lead to another.
+    
+    **Example:** "If we allow same-sex marriage, next people will want to marry animals."
+    
+    **Why Problematic:** Assumes causation without supporting evidence.
+  </Accordion>
+  
+  <Accordion title="Appeal to Authority - False Expertise">
+    **Definition:** Using an authority figure's opinion as evidence when they lack relevant expertise.
+    
+    **Example:** "Einstein believed in God, so atheism must be wrong."
+    
+    **Why Problematic:** Expertise in one domain doesn't transfer to all domains.
+  </Accordion>
+  
+  <Accordion title="Hasty Generalization - Insufficient Evidence">
+    **Definition:** Drawing broad conclusions from limited or unrepresentative samples.
+    
+    **Example:** "I met two rude people from that country - everyone there must be rude."
+    
+    **Why Problematic:** Small samples can't support universal claims.
+  </Accordion>
+</AccordionGroup>
+
+### Fallacy Card Interface
+
+Each detected fallacy is presented in an expandable card showing:
+
+<Steps>
+  <Step title="Severity Badge">
+    Critical (red), Major (orange), or Minor (yellow) severity indicator
+  </Step>
+  <Step title="Category Tag">
+    Logical, Rhetorical, or Statistical fallacy classification
+  </Step>
+  <Step title="Problematic Text">
+    Exact quote from source containing the fallacy
+  </Step>
+  <Step title="Explanation">
+    Clear explanation of why this is problematic reasoning
+  </Step>
+  <Step title="Educational Content">
+    Formal definition and how to avoid this fallacy
+  </Step>
+  <Step title="Suggested Improvement">
+    Logically sound rephrasing of the argument
+  </Step>
+</Steps>
+
+<CodeGroup>
+```typescript Fallacy Detection Schema
+interface DetectedFallacy {
+  id: string;
+  name: string;
+  severity: 'Critical' | 'Major' | 'Minor';
+  category: string;
+  confidence: number; // 0-1 AI confidence score
+  problematicText: string;
+  explanation: string;
+  definition: string;
+  avoidance: string;
+  example: string;
+  suggestion: string;
+  location?: string; // Where in argument structure
+}
+```
+</CodeGroup>
+
+## Narrative Radar
+
+A real-time "Head-Up Display" for trending topics and breaking news analysis.
+
+### How Radar Works
+
+<Steps>
+  <Step title="Topic Curation">
+    Editors select high-impact, trending topics from news cycles
+  </Step>
+  <Step title="Pre-Analysis">
+    AI generates comprehensive blueprints before misinformation spreads
+  </Step>
+  <Step title="Live Updates">
+    Analyses refresh as new sources and social data emerge
+  </Step>
+  <Step title="Public Access">
+    All users can explore pre-generated analyses without API costs
+  </Step>
+</Steps>
+
+<Note>
+  Narrative Radar topics are selected based on public interest, social velocity, and potential for misinformation spread.
+</Note>
+
+### Radar Features
+
+- **Trending Topics Feed** - Curated list of analyzed debates
+- **Impact Metrics** - Social engagement and source count
+- **Freshness Indicators** - Last updated timestamps
+- **Quick Preview** - Summary and credibility score at a glance
+
+## Credibility Scoring
+
+Every analysis receives a "brutally honest" credibility score (1-10) based on multiple factors.
+
+### Scoring Algorithm
+
+<Tabs>
+  <Tab title="Source Quality (30%)">
+    **Factors:**
+    - Number of independent sources (more is better)
+    - Domain diversity (avoid echo chambers)
+    - Trusted outlet presence (Reuters, BBC, etc.)
+    - Recency of sources
+    
+    **Scoring:**
+    - 8+ diverse sources from trusted outlets: +3 points
+    - 4-7 sources with some diversity: +2 points
+    - 1-3 sources or low diversity: +1 point
+  </Tab>
+  
+  <Tab title="Evidence Strength (30%)">
+    **Factors:**
+    - Primary vs. secondary sources
+    - Data-backed claims vs. opinions
+    - Expert quotes with credentials
+    - Study citations and statistics
+    
+    **Scoring:**
+    - Strong primary evidence throughout: +3 points
+    - Mix of primary and secondary: +2 points
+    - Mostly opinion-based: +1 point
+  </Tab>
+  
+  <Tab title="Fallacy Presence (30%)">
+    **Factors:**
+    - Number of detected fallacies
+    - Severity of fallacies (Critical/Major/Minor)
+    - Fallacy concentration in key claims
+    
+    **Scoring:**
+    - No fallacies: 0 penalty
+    - 1-2 Minor fallacies: -0.5 points
+    - 3+ Minor or 1 Major: -1 point
+    - Critical fallacies: -2 to -3 points
+  </Tab>
+  
+  <Tab title="Logical Coherence (10%)">
+    **Factors:**
+    - Internal consistency of arguments
+    - Proper claim-evidence linking
+    - Balanced representation of both sides
+    
+    **Scoring:**
+    - Excellent logical flow: +1 point
+    - Acceptable coherence: +0.5 points
+    - Weak connections: 0 points
+  </Tab>
+</Tabs>
+
+### Score Interpretation
+
+| Score | Interpretation | Typical Characteristics |
+|-------|---------------|------------------------|
+| 9-10 | Exceptional | Multiple primary sources, zero fallacies, strong evidence |
+| 7-8 | Strong | Good source diversity, minimal fallacies, solid evidence |
+| 5-6 | Moderate | Some sources, few fallacies, mixed evidence quality |
+| 3-4 | Weak | Limited sources, several fallacies, opinion-heavy |
+| 1-2 | Very Weak | Poor sourcing, critical fallacies, unreliable |
+
+<Warning>
+  Even well-argued topics rarely score above 8/10. This is intentional - most real-world debates have legitimate complexity and imperfect evidence.
+</Warning>
+
+## Social Pulse
+
+Real-time integration with Twitter/X to capture public sentiment and discourse.
+
+### Data Collection
+
+For each topic, we fetch:
+
+- **20 most relevant tweets** (sorted by engagement)
+- **Author information** (name, handle, profile image)
+- **Engagement metrics** (likes, retweets, replies, impressions)
+- **Timestamp** (when posted)
+
+<CodeGroup>
+```typescript Twitter Search Parameters
+const searchParams = new URLSearchParams({
+  'query': `${topic} lang:en -is:retweet`,
+  'tweet.fields': 'created_at,author_id,public_metrics',
+  'expansions': 'author_id',
+  'user.fields': 'profile_image_url,username,name',
+  'max_results': '20',
+  'sort_order': 'relevancy'
+});
+```
+</CodeGroup>
+
+### AI-Generated Summary
+
+Our AI analyzes collected tweets and generates a neutral summary capturing:
+
+- **Dominant sentiment** (positive/negative/mixed)
+- **Key discussion points** (what people are actually talking about)
+- **Emerging themes** (patterns in public discourse)
+- **Notable perspectives** (unique or influential viewpoints)
+
+<Info>
+  The summary style mimics Twitter/X's "Grok" feature - concise, neutral, and focused on themes rather than individual opinions.
+</Info>
+
+### Tweet Display
+
+Tweets are displayed in interactive cards showing:
+
+- Full tweet text with proper formatting
+- Author name, handle, and avatar
+- Engagement metrics (visual indicators)
+- Link to original tweet
+- Timestamp (relative: "2 hours ago")
+
+## Export & Sharing
+
+Comprehensive export capabilities for all analysis outputs.
+
+### Export Formats
+
+<CardGroup cols={3}>
+  <Card title="PNG Image" icon="image">
+    High-resolution raster image
+    - Resolutions: 1x, 2x, 3x
+    - Light or dark theme
+    - Optional background
+  </Card>
+  <Card title="SVG Vector" icon="vector-square">
+    Scalable vector graphics
+    - Infinite resolution
+    - Editable in design tools
+    - Small file size
+  </Card>
+  <Card title="JSON Data" icon="file-code">
+    Raw structured data
+    - Full blueprint schema
+    - Fallacy details
+    - Source metadata
+  </Card>
+</CardGroup>
+
+### Export Options
+
+<Tabs>
+  <Tab title="Visual Settings">
+    - **Color Mode:** Light or Dark theme
+    - **Background:** Transparent or themed
+    - **Resolution:** 1x (standard), 2x (HD), 3x (print-quality)
+  </Tab>
+  
+  <Tab title="Actions">
+    - **Download:** Save file to device
+    - **Copy to Clipboard:** Quick paste into documents
+    - **Share to Social:** X, LinkedIn, WhatsApp, Telegram
+  </Tab>
+</Tabs>
+
+<CodeGroup>
+```typescript Export Implementation
+// PNG export with custom resolution
+const dataUrl = await htmlToImage.toPng(element, {
+  pixelRatio: 3, // 3x resolution
+  backgroundColor: isDark ? 'hsl(217, 14%, 10%)' : 'hsl(40, 50%, 98%)',
+});
+
+// SVG export (infinite resolution)
+const svgDataUrl = await htmlToImage.toSvg(element, options);
+
+// JSON export (raw data)
+const jsonString = JSON.stringify(blueprint, null, 2);
+```
+</CodeGroup>
+
+## AI-Powered "Ask More"
+
+Interactive chat interface to ask follow-up questions about the analysis.
+
+### How It Works
+
+1. User asks a question about the topic
+2. System provides full blueprint as context to AI
+3. Gemini generates informed response based on analyzed data
+4. Response includes citations to specific blueprint nodes
+
+<Tip>
+  Ask More is perfect for exploring specific claims, requesting clarification on fallacies, or diving deeper into particular evidence.
+</Tip>
+
+### Example Questions
+
+- "What's the strongest evidence for the opposing side?"
+- "Can you explain the Ad Hominem fallacy in claim #3?"
+- "Which sources are most credible on this topic?"
+- "What are the weakest arguments on each side?"
+
+## Real-Time Collaboration
+
+While currently single-user focused, the architecture supports future collaborative features:
+
+- **Shared analyses** - Public URLs for specific blueprints
+- **Annotation layers** - Add personal notes to nodes
+- **Version history** - Track how analyses evolve over time
+- **Workspace teams** - Collaborative analysis for research teams
+
+<Note>
+  Collaboration features are on the roadmap for future releases.
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Create your first analysis in 5 minutes
+  </Card>
+  <Card title="Feature Deep Dives" icon="book" href="/features/argument-mapping">
+    Explore each feature in detail
+  </Card>
+  <Card title="Visualization Modes" icon="eye" href="/guides/visualization-modes">
+    Master all 6 visualization options
+  </Card>
+  <Card title="Fallacy Detection" icon="shield-check" href="/features/fallacy-detection">
+    Learn about logical fallacy identification
+  </Card>
+</CardGroup>

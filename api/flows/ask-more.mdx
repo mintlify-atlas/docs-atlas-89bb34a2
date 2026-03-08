@@ -1,0 +1,164 @@
+---
+title: 'Ask More'
+description: 'Interactive AI assistant for follow-up questions about argument analysis'
+icon: 'messages-question'
+---
+
+## Overview
+
+The `askMore` flow provides an interactive AI research assistant that answers follow-up questions about a specific argument analysis. It has access to the full analysis context and can perform live web and Twitter searches to find additional information.
+
+This flow powers the conversational interface in Argument Cartographer, enabling users to explore topics in depth.
+
+## Function Signature
+
+```typescript
+export const askMoreFlow = ai.defineFlow(
+  {
+    name: 'askMoreFlow',
+    inputSchema: AskMoreInputSchema,
+    outputSchema: AskMoreOutputSchema,
+  },
+  async (input) => { ... }
+)
+```
+
+**Source:** `src/ai/flows/ask-more.ts:23`
+
+## Input Schema
+
+<ParamField path="userQuery" type="string" required>
+  The user's follow-up question.
+</ParamField>
+
+<ParamField path="analysisContext" type="string" required>
+  The JSON string of the current analysis (blueprint, summary, tweets, etc.).
+</ParamField>
+
+<ParamField path="chatHistory" type="ChatMessage[]" required>
+  Previous chat messages in the conversation.
+  
+  Each message has:
+  - `role`: Either "user" or "model"
+  - `content`: The message text
+</ParamField>
+
+### Input Type
+
+```typescript
+const AskMoreInputSchema = z.object({
+  userQuery: z.string().describe("The user's follow-up question."),
+  analysisContext: z.string().describe("The JSON string of the current analysis (blueprint, summary, etc.)."),
+  chatHistory: z.array(z.object({
+    role: z.enum(['user', 'model']),
+    content: z.string()
+  })).describe("Previous chat messages."),
+});
+```
+
+## Output Schema
+
+<ResponseField name="answer" type="string" required>
+  The comprehensive answer to the user's question, potentially enriched with live research.
+</ResponseField>
+
+### Output Type
+
+```typescript
+const AskMoreOutputSchema = z.object({
+  answer: z.string().describe("The comprehensive answer to the user's question."),
+});
+```
+
+## How It Works
+
+The Ask More flow follows this intelligent workflow:
+
+1. **Context Analysis**: Checks if the answer exists in the current analysis context or chat history
+2. **Direct Answer**: If found in context, answers directly with citations
+3. **Live Research**: If not in context, uses AI tools to perform:
+   - Web searches for current information
+   - Twitter searches for social sentiment
+4. **Answer Generation**: Synthesizes findings into a comprehensive, well-formatted response
+5. **Citation**: Mentions which tools were used and what was found
+
+## Available Tools
+
+The flow has access to:
+
+- **webSearch**: Find current information from trusted news sources
+- **twitterSearch**: Discover social media sentiment and discussions
+
+## Example Usage
+
+```typescript
+import { askMoreFlow } from '@/ai/flows/ask-more';
+
+const analysis = JSON.stringify({
+  blueprint: [...],
+  summary: "...",
+  analysis: "...",
+  // ... full blueprint output
+});
+
+const result = await askMoreFlow({
+  userQuery: "What are the latest developments on this topic?",
+  analysisContext: analysis,
+  chatHistory: [
+    { role: 'user', content: 'What is the main argument?' },
+    { role: 'model', content: 'The main argument is...' }
+  ]
+});
+
+console.log(result.answer);
+```
+
+## System Behavior
+
+The AI assistant is configured to:
+
+- **Context First**: Always check existing context before searching
+- **Live Research**: Use tools for questions about current events or information not in context
+- **Grok Style**: Be objective, detailed, and slightly conversational
+- **Formatting**: Use Markdown (bold, lists) for readability
+- **Transparency**: Mention which tools were used and what was found
+
+**System Prompt** (from `src/ai/flows/ask-more.ts:37`):
+
+```
+You are 'Ask More', an advanced AI research assistant for the 'Argument Cartographer' platform.
+Your goal is to answer the user's follow-up questions about a specific Argument Analysis.
+
+*** CURRENT ANALYSIS CONTEXT ***
+{analysisContext}
+*** END CONTEXT ***
+
+INSTRUCTIONS:
+1. Context First: Check if the 'CURRENT ANALYSIS CONTEXT' or 'chatHistory' already 
+   contains the answer. If yes, answer directly from it and cite it.
+2. Live Research: If the user asks something NOT in the context (e.g., "What happened today?" 
+   or "Check X about this"), USE THE TOOLS ("webSearch", "twitterSearch") to find live information.
+3. Grok Style: Be objective, detailed, and slightly conversational. If you used a tool, mention what you found.
+4. Formatting: Use Markdown (bold, lists) for readability.
+```
+
+## Configuration
+
+- **Temperature**: 0.5 (balanced creativity)
+- **Context Limit**: 20,000 characters (truncated for context window safety)
+- **Tools**: Web Search and Twitter Search enabled
+
+## Use Cases
+
+- **Exploratory Questions**: "What are the counterarguments to this?"
+- **Current Events**: "What happened today regarding this topic?"
+- **Deep Dives**: "Explain the economic implications in more detail"
+- **Fact Checking**: "Is this claim verified by other sources?"
+- **Social Sentiment**: "What are people saying about this on Twitter?"
+- **Follow-up Clarification**: "Can you elaborate on point 3?"
+
+## Related
+
+- [Generate Blueprint Flow](/api/flows/generate-blueprint)
+- [Web Search Tool](/api/tools/web-search)
+- [Twitter Search Tool](/api/tools/twitter-search)

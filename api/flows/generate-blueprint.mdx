@@ -1,0 +1,153 @@
+---
+title: 'Generate Argument Blueprint'
+description: 'Generate a structured JSON blueprint of arguments from a topic query, URL, or document'
+icon: 'sitemap'
+---
+
+## Overview
+
+The `generateArgumentBlueprint` flow analyzes a topic, URL, or document to create a comprehensive, structured argument blueprint. It performs web searches, scrapes sources, detects logical fallacies, analyzes social media sentiment, and generates a detailed breakdown of arguments on both sides of an issue.
+
+This is the core analysis engine of Argument Cartographer.
+
+## Function Signature
+
+```typescript
+export async function generateArgumentBlueprint(
+  input: GenerateArgumentBlueprintInput
+): Promise<GenerateArgumentBlueprintOutput>
+```
+
+**Source:** `src/ai/flows/generate-argument-blueprint.ts:91`
+
+## Input Schema
+
+<ParamField path="input" type="string" required>
+  A topic query, URL, or document to analyze.
+</ParamField>
+
+### Input Type
+
+```typescript
+const GenerateArgumentBlueprintInputSchema = z.object({
+  input: z.string(),
+});
+
+type GenerateArgumentBlueprintInput = z.infer<typeof GenerateArgumentBlueprintInputSchema>;
+```
+
+## Output Schema
+
+The function returns a comprehensive analysis object containing:
+
+<ResponseField name="blueprint" type="ArgumentNode[]" required>
+  A structured JSON blueprint of the arguments. Each node represents a thesis, claim, counterclaim, or evidence.
+  
+  See [Argument Node Schema](/api/schemas/argument-node) for details.
+</ResponseField>
+
+<ResponseField name="summary" type="string" required>
+  A concise, neutral summary of the overall state of the debate.
+</ResponseField>
+
+<ResponseField name="analysis" type="string" required>
+  AI-driven meta-analysis providing novel insights, identifying emerging themes, logical gaps, or the overall state of the debate.
+</ResponseField>
+
+<ResponseField name="credibilityScore" type="number" required>
+  A score from 1-10 rating the overall quality, diversity, and reliability of the sources found.
+</ResponseField>
+
+<ResponseField name="brutalHonestTake" type="string" required>
+  A candid, slightly cynical, 'no-BS' summary of the situation, written in simple, conversational language.
+</ResponseField>
+
+<ResponseField name="keyPoints" type="string[]" required>
+  A list of 3-5 key takeaways or summary points.
+</ResponseField>
+
+<ResponseField name="socialPulse" type="string" required>
+  A summary of the public sentiment and key discussion points on the topic from social media platform X (Twitter).
+</ResponseField>
+
+<ResponseField name="tweets" type="Tweet[]" required>
+  An array of relevant tweets from X/Twitter with author information and engagement metrics.
+</ResponseField>
+
+<ResponseField name="fallacies" type="DetectedFallacy[]">
+  An array of logical fallacies detected in the source material.
+  
+  See [Fallacy Detection Schema](/api/schemas/fallacy-detection) for details.
+</ResponseField>
+
+### Output Type
+
+```typescript
+const GenerateArgumentBlueprintOutputSchema = z.object({
+  blueprint: z.array(ArgumentNodeSchema),
+  summary: z.string(),
+  analysis: z.string(),
+  credibilityScore: z.number().min(1).max(10),
+  brutalHonestTake: z.string(),
+  keyPoints: z.array(z.string()),
+  socialPulse: z.string(),
+  tweets: z.array(TweetSchema),
+  fallacies: z.array(DetectedFallacySchema).optional(),
+});
+
+type GenerateArgumentBlueprintOutput = z.infer<typeof GenerateArgumentBlueprintOutputSchema>;
+```
+
+## How It Works
+
+The flow executes the following pipeline:
+
+1. **Query Generation**: Converts user input into an optimized 2-4 word search query
+2. **Web Search**: Performs dual web searches using Firecrawl to find diverse news sources
+3. **Source Selection**: Selects up to 8 unique domains from trusted news outlets
+4. **Parallel Scraping**: Batch scrapes selected URLs in parallel for maximum efficiency
+5. **Context Assembly**: Constructs research context from scraped articles (up to 12,000 chars per source)
+6. **AI Analysis**: Runs main analysis prompt with context to generate blueprint and detect fallacies
+7. **Twitter Analysis**: Fetches relevant tweets and generates social pulse summary
+8. **Result Aggregation**: Combines all outputs into final blueprint
+
+## Example Usage
+
+```typescript
+import { generateArgumentBlueprint } from '@/ai/flows/generate-argument-blueprint';
+
+const result = await generateArgumentBlueprint({
+  input: 'climate change policy'
+});
+
+console.log(result.summary);
+console.log(`Found ${result.blueprint.length} argument nodes`);
+console.log(`Credibility Score: ${result.credibilityScore}/10`);
+console.log(`Detected ${result.fallacies?.length || 0} fallacies`);
+```
+
+## Core Principles
+
+The analysis follows these principles:
+
+- **Objectivity is Paramount**: Acts as a neutral synthesizer of information
+- **Depth and Detail**: Identifies distinct lines of reasoning and supporting evidence
+- **Ground Everything in Sources**: Every node must be tied to the provided context
+- **Detect Logical Fallacies**: Actively scans source text for errors in reasoning
+
+## Fallback Behavior
+
+The flow includes multiple fallback mechanisms:
+
+- If scraping fails, uses search snippets as context
+- If search APIs are unavailable, generates analysis from training knowledge (limited mode)
+- Validates and fixes AI output (e.g., credibility scores, null source URIs)
+
+## Related
+
+- [Argument Node Schema](/api/schemas/argument-node)
+- [Blueprint Output Schema](/api/schemas/blueprint-output)
+- [Fallacy Detection Schema](/api/schemas/fallacy-detection)
+- [Web Search Tool](/api/tools/web-search)
+- [Web Scraper Tool](/api/tools/web-scraper)
+- [Twitter Search Tool](/api/tools/twitter-search)

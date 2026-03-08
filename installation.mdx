@@ -1,0 +1,492 @@
+---
+title: Installation
+description: Complete guide to setting up your own instance of Argument Cartographer locally or in the cloud
+---
+
+## Overview
+
+Argument Cartographer is built as a modern Next.js 15 application with server-side AI orchestration. This guide covers everything from local development to production deployment.
+
+<Warning>
+  This guide is for developers who want to run their own instance. End users should use the hosted version at [your-domain.com]
+</Warning>
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+<CardGroup cols={2}>
+  <Card title="Node.js 18+" icon="node-js">
+    Download from [nodejs.org](https://nodejs.org)
+  </Card>
+  <Card title="Git" icon="git">
+    Version control - [git-scm.com](https://git-scm.com)
+  </Card>
+  <Card title="Firebase Project" icon="fire">
+    Create at [console.firebase.google.com](https://console.firebase.google.com)
+  </Card>
+  <Card title="API Keys" icon="key">
+    Google GenAI, Firecrawl, Twitter Bearer Token
+  </Card>
+</CardGroup>
+
+### System Requirements
+
+- **OS:** macOS, Linux, or Windows (WSL2 recommended)
+- **RAM:** Minimum 8GB (16GB recommended)
+- **Disk Space:** 2GB for dependencies and build artifacts
+- **Internet:** Required for AI API calls
+
+## Step 1: Clone the Repository
+
+First, clone the project from GitHub:
+
+<CodeGroup>
+```bash Git Clone
+git clone https://github.com/BHARTIYAYASH/ARGX.git
+cd ARGX
+```
+</CodeGroup>
+
+<Tip>
+  If you're forking the project, replace the URL with your fork's repository URL.
+</Tip>
+
+## Step 2: Install Dependencies
+
+Install all required npm packages:
+
+<CodeGroup>
+```bash npm
+npm install
+```
+
+```bash yarn
+yarn install
+```
+
+```bash pnpm
+pnpm install
+```
+</CodeGroup>
+
+### Key Dependencies
+
+The installation includes:
+
+- **Next.js 15** - React framework with App Router
+- **Firebase** - Authentication and Firestore database
+- **Genkit** - AI orchestration framework
+- **React Flow** - Interactive graph visualization
+- **Tailwind CSS** - Utility-first styling
+- **Radix UI** - Accessible component primitives
+
+<Info>
+  Installation typically takes 2-5 minutes depending on your internet speed.
+</Info>
+
+## Step 3: Configure Environment Variables
+
+Create a `.env` file in the project root with all required API keys and configuration.
+
+### Create .env File
+
+<CodeGroup>
+```bash Terminal
+cp .env.example .env
+```
+</CodeGroup>
+
+### Required Environment Variables
+
+<Tabs>
+  <Tab title="AI Configuration">
+    ```env
+    # Google Gemini AI API Key
+    GOOGLE_GENAI_API_KEY=your_gemini_api_key_here
+    ```
+    
+    **How to obtain:**
+    1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+    2. Create a new API key
+    3. Copy and paste into .env
+    
+    <Note>
+      Free tier includes 60 requests per minute - sufficient for development.
+    </Note>
+  </Tab>
+  
+  <Tab title="External Tools">
+    ```env
+    # Firecrawl Web Search & Scraping
+    FIRECRAWL_API_KEY=your_firecrawl_api_key
+    
+    # Twitter/X API Bearer Token
+    TWITTER_BEARER_TOKEN=your_twitter_bearer_token
+    ```
+    
+    **Firecrawl Setup:**
+    1. Sign up at [firecrawl.dev](https://firecrawl.dev)
+    2. Get API key from dashboard
+    3. Free tier: 500 requests/month
+    
+    **Twitter Setup:**
+    1. Apply for Twitter Developer account at [developer.twitter.com](https://developer.twitter.com)
+    2. Create a new app
+    3. Generate Bearer Token from app settings
+    4. Copy Bearer Token (starts with `AAAA...`)
+  </Tab>
+  
+  <Tab title="Firebase Client">
+    ```env
+    # Firebase Client SDK Configuration
+    NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+    NEXT_PUBLIC_FIREBASE_APP_ID=1:123:web:abc123
+    ```
+    
+    **How to obtain:**
+    1. Go to [Firebase Console](https://console.firebase.google.com)
+    2. Select your project
+    3. Click ⚙️ Settings → Project settings
+    4. Scroll to "Your apps" section
+    5. Click the "Web app" icon
+    6. Copy the config values
+  </Tab>
+  
+  <Tab title="Firebase Admin">
+    ```env
+    # Firebase Admin SDK (Server-Side)
+    SERVICE_ACCOUNT_PROJECT_ID=your_project_id
+    SERVICE_ACCOUNT_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your_project.iam.gserviceaccount.com
+    SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour\nPrivate\nKey\nHere\n-----END PRIVATE KEY-----\n"
+    ```
+    
+    **How to obtain:**
+    1. Firebase Console → Project Settings
+    2. Go to **Service accounts** tab
+    3. Click **Generate new private key**
+    4. Download JSON file
+    5. Extract values:
+       - `project_id` → SERVICE_ACCOUNT_PROJECT_ID
+       - `client_email` → SERVICE_ACCOUNT_CLIENT_EMAIL
+       - `private_key` → SERVICE_ACCOUNT_PRIVATE_KEY (keep \n characters)
+    
+    <Warning>
+      Keep the private key secure! Never commit it to version control.
+    </Warning>
+  </Tab>
+</Tabs>
+
+### Complete .env Example
+
+<CodeGroup>
+```env Complete Configuration
+# AI Configuration
+GOOGLE_GENAI_API_KEY=AIzaSy...
+
+# External Tools
+FIRECRAWL_API_KEY=fc-...
+TWITTER_BEARER_TOKEN=AAAAAAAAAAAAA...
+
+# Firebase Client Config
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyD...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=myproject.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=myproject-abc123
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=myproject-abc123.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123:web:abc123def456
+
+# Firebase Admin Config
+SERVICE_ACCOUNT_PROJECT_ID=myproject-abc123
+SERVICE_ACCOUNT_CLIENT_EMAIL=firebase-adminsdk-xxxxx@myproject.iam.gserviceaccount.com
+SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBg...\n-----END PRIVATE KEY-----\n"
+```
+</CodeGroup>
+
+## Step 4: Set Up Firebase
+
+Configure Firebase Authentication and Firestore database.
+
+### Enable Authentication
+
+<Steps>
+  <Step title="Navigate to Authentication">
+    Firebase Console → Build → Authentication
+  </Step>
+  
+  <Step title="Get Started">
+    Click **Get started** button
+  </Step>
+  
+  <Step title="Enable Email/Password">
+    - Click **Email/Password** provider
+    - Toggle **Enable**
+    - Save changes
+  </Step>
+  
+  <Step title="(Optional) Add Other Providers">
+    You can also enable:
+    - Google Sign-In
+    - GitHub
+    - Twitter
+  </Step>
+</Steps>
+
+### Set Up Firestore Database
+
+<Steps>
+  <Step title="Navigate to Firestore">
+    Firebase Console → Build → Firestore Database
+  </Step>
+  
+  <Step title="Create Database">
+    Click **Create database**
+  </Step>
+  
+  <Step title="Choose Mode">
+    Select **Production mode** (we'll add custom rules next)
+  </Step>
+  
+  <Step title="Select Location">
+    Choose a region close to your users (e.g., `us-central1`)
+  </Step>
+</Steps>
+
+### Deploy Security Rules
+
+The project includes comprehensive Firestore security rules in `firestore.rules`:
+
+<CodeGroup>
+```javascript firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper: Check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper: Check ownership
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // User profiles
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Prevent user enumeration
+      allow create: if isOwner(userId);
+      allow update, delete: if isOwner(userId);
+    }
+    
+    // Argument maps (private to user)
+    match /users/{userId}/argumentMaps/{mapId} {
+      allow read, write: if isOwner(userId);
+    }
+    
+    // Sources (private to user)
+    match /users/{userId}/sources/{sourceId} {
+      allow read, write: if isOwner(userId);
+    }
+  }
+}
+```
+</CodeGroup>
+
+**Deploy rules:**
+
+<CodeGroup>
+```bash Firebase CLI
+# Install Firebase CLI if not already installed
+npm install -g firebase-tools
+
+# Login
+firebase login
+
+# Deploy rules only
+firebase deploy --only firestore:rules
+```
+</CodeGroup>
+
+<Info>
+  The security model ensures strict user data isolation - each user can only access their own data.
+</Info>
+
+## Step 5: Run Development Server
+
+Start the local development server with hot reload:
+
+<CodeGroup>
+```bash npm
+npm run dev
+```
+
+```bash yarn
+yarn dev
+```
+
+```bash pnpm
+pnpm dev
+```
+</CodeGroup>
+
+The application will start on **http://localhost:9002** (custom port to avoid conflicts).
+
+<Tip>
+  The development server uses Turbopack for faster builds and hot module replacement.
+</Tip>
+
+### Verify Installation
+
+Open your browser and navigate to:
+
+1. **http://localhost:9002** - Homepage should load
+2. **http://localhost:9002/login** - Login page with Firebase auth
+3. **http://localhost:9002/dashboard** - Should redirect to login (requires auth)
+
+## Step 6: Test AI Flows (Optional)
+
+Genkit provides a development UI to test AI flows independently:
+
+<CodeGroup>
+```bash Start Genkit Dev Server
+npm run genkit:dev
+```
+</CodeGroup>
+
+This opens a web interface at **http://localhost:4000** where you can:
+
+- Test `generateArgumentBlueprint` flow
+- Test `identifyLogicalFallacies` flow
+- Test `webSearch` and `twitterSearch` tools
+- View trace logs and performance metrics
+
+<Note>
+  The Genkit dev server runs separately from the Next.js app - you can run both simultaneously.
+</Note>
+
+## Step 7: Build for Production
+
+Create an optimized production build:
+
+<CodeGroup>
+```bash Build Command
+NODE_ENV=production npm run build
+```
+</CodeGroup>
+
+### Build Output
+
+You'll see output like:
+
+```
+✓ Compiled successfully
+✓ Collecting page data
+✓ Generating static pages (12/12)
+✓ Collecting build traces
+✓ Finalizing page optimization
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    5.2 kB         120 kB
+├ ○ /dashboard                           8.1 kB         145 kB
+├ ○ /login                               3.4 kB         118 kB
+└ ○ /analysis/[id]                      12.3 kB         158 kB
+```
+
+<Info>
+  First Load JS sizes include shared chunks. Individual routes are optimized via code splitting.
+</Info>
+
+### Start Production Server
+
+<CodeGroup>
+```bash Production Mode
+npm run start
+```
+</CodeGroup>
+
+The production server runs on **http://localhost:3000** by default.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Module Not Found Errors">
+    **Problem:** `Error: Cannot find module 'xyz'`
+    
+    **Solution:**
+    ```bash
+    # Clear node_modules and reinstall
+    rm -rf node_modules
+    npm install
+    ```
+  </Accordion>
+  
+  <Accordion title="Firebase Auth Errors">
+    **Problem:** `Firebase: Error (auth/invalid-api-key)`
+    
+    **Solution:**
+    - Verify all `NEXT_PUBLIC_FIREBASE_*` variables in .env
+    - Check that API key matches Firebase Console
+    - Ensure no extra quotes or spaces in .env values
+  </Accordion>
+  
+  <Accordion title="Genkit API Errors">
+    **Problem:** `Error: GOOGLE_GENAI_API_KEY is not set`
+    
+    **Solution:**
+    - Verify `GOOGLE_GENAI_API_KEY` in .env
+    - Check that the key is valid in Google AI Studio
+    - Restart dev server after adding the key
+  </Accordion>
+  
+  <Accordion title="Build Fails with TypeScript Errors">
+    **Problem:** Type errors during `npm run build`
+    
+    **Solution:**
+    ```bash
+    # Run type check independently
+    npm run typecheck
+    
+    # Fix reported errors, then rebuild
+    npm run build
+    ```
+  </Accordion>
+  
+  <Accordion title="Port Already in Use">
+    **Problem:** `Error: listen EADDRINUSE: address already in use :::9002`
+    
+    **Solution:**
+    ```bash
+    # Find and kill process using port 9002
+    lsof -ti:9002 | xargs kill
+    
+    # Or change port in package.json:
+    # "dev": "next dev -p 3000"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/configuration">
+    Customize settings and features
+  </Card>
+  
+  <Card title="Deploy to Vercel" icon="rocket" href="/deployment/vercel">
+    Deploy to production
+  </Card>
+  
+  <Card title="Architecture" icon="sitemap" href="/architecture/overview">
+    Understand the system design
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/flows/generate-blueprint">
+    Explore the API surface
+  </Card>
+</CardGroup>

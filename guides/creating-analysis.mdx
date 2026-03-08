@@ -1,0 +1,428 @@
+---
+title: Creating Analysis
+description: Best practices and tips for generating high-quality argument analyses with Argument Cartographer
+---
+
+## Overview
+
+Creating effective argument analyses is both an art and a science. This guide covers strategies for choosing topics, formulating inputs, and getting the most accurate and insightful results from the AI.
+
+<Info>
+  The quality of your analysis depends heavily on the input you provide and the availability of quality sources on your topic.
+</Info>
+
+## Choosing the Right Topic
+
+### Ideal Topic Characteristics
+
+<Steps>
+  <Step title="Genuine Controversy">
+    Choose topics with legitimate arguments on multiple sides
+    
+    **Good:** "Should social media platforms moderate political content?"
+    
+    **Poor:** "Is murder wrong?" (no genuine debate)
+  </Step>
+  
+  <Step title="Sufficient Coverage">
+    Topics need at least 5-8 quality sources for thorough analysis
+    
+    **Good:** Current policy debates, tech controversies, major cultural issues
+    
+    **Poor:** Hyper-local issues, personal disputes, brand-new topics
+  </Step>
+  
+  <Step title="Appropriate Scope">
+    Neither too broad nor too narrow
+    
+    **Good:** "Universal Basic Income implementation challenges"
+    
+    **Too Broad:** "Economics"
+    
+    **Too Narrow:** "UBI pilot program in Stockton, CA, week 3 results"
+  </Step>
+  
+  <Step title="Timely But Not Breaking">
+    Recent enough for fresh sources, old enough for analysis
+    
+    **Good:** Topics from last 30 days with established discourse
+    
+    **Poor:** Stories from the last 2 hours (sources still developing)
+  </Step>
+</Steps>
+
+### Topic Categories That Work Well
+
+<Tabs>
+  <Tab title="Technology & Ethics">
+    - AI regulation and safety
+    - Data privacy and surveillance
+    - Social media impact on society
+    - Cryptocurrency legitimacy
+    - Autonomous vehicle ethics
+    
+    **Why they work:** High coverage, clear stakeholders, ethical dimensions
+  </Tab>
+  
+  <Tab title="Public Policy">
+    - Healthcare reform proposals
+    - Education policy (testing, funding, curriculum)
+    - Criminal justice reform
+    - Immigration policy
+    - Environmental regulation
+    
+    **Why they work:** Multiple expert sources, documented evidence, political engagement
+  </Tab>
+  
+  <Tab title="Science & Medicine">
+    - Vaccine mandates and hesitancy
+    - Climate change policy responses
+    - GMO safety and labeling
+    - Medical ethics (right to die, genetic editing)
+    
+    **Why they work:** Research-backed, expert commentary, public interest
+  </Tab>
+  
+  <Tab title="Social & Cultural">
+    - Free speech vs. hate speech
+    - Cultural appropriation debates
+    - Gender and identity issues
+    - Religious freedom vs. discrimination
+    
+    **Why they work:** Passionate discourse, diverse perspectives, philosophical depth
+  </Tab>
+</Tabs>
+
+## Input Formats
+
+### Format 1: Topic Query
+
+The most common and versatile input type.
+
+<CodeGroup>
+```text Good Query Examples
+"Should artificial intelligence be regulated by governments?"
+
+"Universal Basic Income: Pros and cons"
+
+"Climate change carbon tax effectiveness"
+
+"Free speech vs hate speech on social media"
+
+"Nuclear energy as climate solution"
+```
+</CodeGroup>
+
+**Tips for queries:**
+- Frame as a question OR state the controversy
+- Include key search terms (specific names, concepts)
+- Avoid yes/no questions when possible
+- Be specific but not overly technical
+
+<Warning>
+  **Avoid:** "What do you think about AI?" (too vague)
+  
+  **Better:** "Should AI-generated art be copyrightable?"
+</Warning>
+
+### Format 2: Article URL
+
+Analyze a specific piece of content.
+
+<CodeGroup>
+```text URL Input
+https://www.bbc.com/news/technology-67890123
+
+https://www.nytimes.com/2024/03/01/opinion/ai-regulation.html
+
+https://www.reuters.com/world/climate-summit-2024
+```
+</CodeGroup>
+
+**When to use URLs:**
+- Analyzing a specific article's arguments
+- Starting from a source you trust
+- Fact-checking a particular piece
+
+**System behavior:**
+1. Scrapes the article content
+2. Identifies the central claim
+3. Searches for additional sources on the same topic
+4. Compares arguments across sources
+
+<Tip>
+  The system will analyze the URL AND find supporting/opposing sources - you're not limited to just that one article.
+</Tip>
+
+### Format 3: Raw Text
+
+Paste full text of an argument for analysis.
+
+**Best for:**
+- Debate transcripts
+- Academic essays
+- Opinion pieces
+- Social media threads (copy-paste)
+- Email arguments
+
+**Limitations:**
+- 50,000 character limit
+- System may struggle to find corroborating sources
+- Best results when text includes citations
+
+<CodeGroup>
+```text Raw Text Example
+Paste full argument here:
+
+"The case for universal basic income rests on three pillars.
+First, automation is eliminating jobs faster than new ones are
+created. Second, existing welfare systems are inefficient and
+stigmatizing. Third, pilot programs in Finland and Kenya show..."
+
+[Continue with full text]
+```
+</CodeGroup>
+
+## Optimizing Analysis Quality
+
+### Pre-Analysis Checklist
+
+<Steps>
+  <Step title="Research Availability">
+    Quick Google search: Does your topic have 5+ recent articles?
+    
+    If not, consider:
+    - Broadening the topic
+    - Choosing a more newsworthy angle
+    - Waiting for more coverage
+  </Step>
+  
+  <Step title="Refine Your Query">
+    Test different phrasings:
+    - "AI regulation" vs "artificial intelligence government oversight"
+    - "UBI" vs "universal basic income" (use full terms)
+    - Include synonyms if topic has multiple names
+  </Step>
+  
+  <Step title="Check Recency">
+    For time-sensitive topics, include year:
+    - "2024 election polling accuracy"
+    - "COVID vaccine effectiveness 2024"
+  </Step>
+  
+  <Step title="Set Expectations">
+    Understanding: Complex topics may take 30-45 seconds to analyze
+  </Step>
+</Steps>
+
+### During Analysis
+
+Watch the progress indicators:
+
+1. **🔍 Searching web sources...** (5-10s)
+   - System finding articles via Firecrawl
+   - Looking for 8+ diverse sources
+
+2. **📰 Scraping articles...** (10-15s)
+   - Extracting full text from URLs
+   - Converting to markdown format
+
+3. **🐦 Fetching social sentiment...** (3-5s)
+   - Searching Twitter for recent tweets
+   - Gathering engagement metrics
+
+4. **🤖 Analyzing arguments...** (10-15s)
+   - Gemini decomposing logical structure
+   - Identifying claims and evidence
+
+5. **⚠️ Detecting fallacies...** (5-8s)
+   - Scanning for logical errors
+   - Classifying fallacy types
+
+6. **✅ Generating blueprint...** (2-3s)
+   - Validating data schemas
+   - Rendering visualization
+
+<Note>
+  If any step fails (API error, no sources found), the system will attempt fallbacks. You'll see warning messages if the analysis is degraded.
+</Note>
+
+## Common Pitfalls & Solutions
+
+<AccordionGroup>
+  <Accordion title="No Sources Found">
+    **Problem:** "Web search returned 0 results"
+    
+    **Causes:**
+    - Topic too niche
+    - Misspelled terms
+    - Very recent topic (< 24 hours)
+    - Firecrawl API quota exceeded
+    
+    **Solutions:**
+    1. Rephrase with more common terms
+    2. Broaden the topic slightly
+    3. Try a related angle with more coverage
+    4. Use URL input with a known article
+  </Accordion>
+  
+  <Accordion title="Low Credibility Score (1-3)">
+    **Problem:** Analysis returns but credibility is very low
+    
+    **Causes:**
+    - Few sources available (< 3)
+    - Sources are opinion pieces, not news/research
+    - Multiple critical fallacies detected
+    - Echo chamber (all sources from one outlet)
+    
+    **Solutions:**
+    1. Choose a more mainstream topic
+    2. Wait for more coverage to emerge
+    3. Accept that topic genuinely lacks strong evidence
+    4. Use Narrative Radar for pre-vetted topics
+  </Accordion>
+  
+  <Accordion title="One-Sided Analysis">
+    **Problem:** Blueprint shows mostly "for" or mostly "against"
+    
+    **Causes:**
+    - Topic isn't genuinely controversial (consensus exists)
+    - Search query biased ("benefits of X" vs "X pros and cons")
+    - Sources happen to lean one direction
+    
+    **Solutions:**
+    1. Rephrase as neutral question
+    2. Check if consensus is real (maybe issue is settled)
+    3. Manually search for opposing views and analyze via URL
+  </Accordion>
+  
+  <Accordion title="Too Many Fallacies">
+    **Problem:** 10+ fallacies detected, feels excessive
+    
+    **Causes:**
+    - AI is overly sensitive (flagging rhetorical flourishes)
+    - Sources genuinely use emotional/manipulative language
+    - Confidence scores are high (AI is confident in detections)
+    
+    **Solutions:**
+    1. Filter by confidence (hide < 70%)
+    2. Read the fallacy explanations - are they valid?
+    3. Accept that some topics invite emotional arguments
+    4. Use fallacies as learning, not absolute truth
+  </Accordion>
+  
+  <Accordion title="No Social Pulse Data">
+    **Problem:** "No tweets found for this topic"
+    
+    **Causes:**
+    - Topic not discussed on Twitter recently
+    - Search query doesn't match Twitter language
+    - Twitter API rate limit hit
+    
+    **Solutions:**
+    1. This is OK - not all topics need social data
+    2. Try broader search terms
+    3. Check if topic is genuinely niche
+    4. Analysis still valid without social pulse
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Techniques
+
+### Comparative Analysis
+
+Create multiple analyses to compare:
+
+1. **Same topic, different angles:**
+   - "UBI economic impact"
+   - "UBI social impact"
+   - "UBI political feasibility"
+   
+   Compare credibility scores and evidence types
+
+2. **Evolution over time:**
+   - Analyze historical articles (paste text)
+   - Compare to current Narrative Radar topic
+   - Track how arguments evolved
+
+3. **Source triangulation:**
+   - Analyze specific left-leaning source URL
+   - Analyze right-leaning source URL
+   - Analyze neutral topic query
+   - Compare blueprints for bias
+
+### Using AI Chat for Depth
+
+After generating analysis, use "Ask More" to:
+
+<CodeGroup>
+```text Example Follow-Up Questions
+"What's the strongest evidence for the opposing side?"
+
+"Which claims lack sufficient evidence?"
+
+"Are there any unstated assumptions in claim #3?"
+
+"What questions does this analysis leave unanswered?"
+
+"Which fallacies are most damaging to the overall argument?"
+
+"Compare the quality of sources for each side"
+```
+</CodeGroup>
+
+### Combining with External Research
+
+1. **Start with Argument Cartographer** for overview
+2. **Identify gaps** (claims without evidence, missing perspectives)
+3. **Research those gaps** using academic databases, expert sources
+4. **Create follow-up analysis** with URL input of new sources
+5. **Compare blueprints** to see how picture evolves
+
+## Best Practices Summary
+
+<CardGroup cols={2}>
+  <Card title="Choose Wisely" icon="bullseye">
+    Controversial + timely + well-covered topics work best
+  </Card>
+  
+  <Card title="Phrase Neutrally" icon="scale-balanced">
+    "X vs Y" not "Why X is wrong"
+  </Card>
+  
+  <Card title="Iterate" icon="rotate">
+    Try different phrasings if first attempt disappoints
+  </Card>
+  
+  <Card title="Verify Sources" icon="magnifying-glass">
+    Click through and read original articles
+  </Card>
+  
+  <Card title="Use Multiple Views" icon="eye">
+    Switch visualization modes for different insights
+  </Card>
+  
+  <Card title="Export & Share" icon="share">
+    Save high-quality analyses for future reference
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Visualization Modes" icon="eye" href="/guides/visualization-modes">
+    Master all 6 ways to view your analysis
+  </Card>
+  
+  <Card title="Exporting Results" icon="download" href="/guides/exporting-results">
+    Learn to export and share your findings
+  </Card>
+  
+  <Card title="Narrative Radar" icon="radar" href="/features/narrative-radar">
+    Explore pre-analyzed trending topics
+  </Card>
+  
+  <Card title="Credibility Scoring" icon="chart-line" href="/features/credibility-scoring">
+    Understand how analyses are scored
+  </Card>
+</CardGroup>

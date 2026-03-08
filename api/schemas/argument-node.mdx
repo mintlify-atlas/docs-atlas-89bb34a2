@@ -1,0 +1,175 @@
+---
+title: 'Argument Node Schema'
+description: 'Structure of individual argument nodes in the blueprint'
+icon: 'diagram-project'
+---
+
+## Overview
+
+The `ArgumentNode` schema defines the structure of each node in an argument blueprint. Each node represents a thesis, claim, counterclaim, or piece of evidence in the argument tree.
+
+This schema is central to Argument Cartographer's mapping and visualization capabilities.
+
+## Schema Definition
+
+```typescript
+const ArgumentNodeSchema = z.object({
+  id: z.string().describe('Unique identifier for the argument node.'),
+  parentId: z.string().nullable().describe('ID of the parent node, or null if it is a root node.'),
+  type: z.enum(['thesis', 'claim', 'counterclaim', 'evidence']).describe('Type of the argument node.'),
+  side: z.enum(['for', 'against']).describe('Side of the argument node.'),
+  content: z.string().describe('The content of the argument node.'),
+  sourceText: z.string().describe('The original text snippet from the source that supports the content.'),
+  source: z.string().describe('The URL of the source document.'),
+  fallacies: z.array(z.string()).describe('An array of logical fallacies identified in this specific argument node.'),
+  logicalRole: z.string().describe("A concise statement explaining the node's function in the overall argument (e.g., 'Primary legal basis for the thesis')."),
+});
+```
+
+**Source:** `src/ai/flows/generate-argument-blueprint.ts:28`
+
+## Fields
+
+<ParamField path="id" type="string" required>
+  Unique identifier for the argument node.
+  
+  Format: Usually incremental like "1", "2", "3" or hierarchical like "1.1", "1.2".
+</ParamField>
+
+<ParamField path="parentId" type="string | null" required>
+  ID of the parent node, or `null` if this is a root node (thesis).
+  
+  This creates the tree structure of the argument.
+</ParamField>
+
+<ParamField path="type" type="enum" required>
+  Type of the argument node.
+  
+  Possible values:
+  - `thesis`: The main question or topic being debated
+  - `claim`: An argument supporting the thesis
+  - `counterclaim`: An argument opposing the thesis
+  - `evidence`: Supporting evidence for a claim or counterclaim
+</ParamField>
+
+<ParamField path="side" type="enum" required>
+  Side of the argument node.
+  
+  Possible values:
+  - `for`: Supports the thesis or parent claim
+  - `against`: Opposes the thesis or parent claim
+</ParamField>
+
+<ParamField path="content" type="string" required>
+  The content of the argument node.
+  
+  A clear, concise statement of the argument or evidence.
+</ParamField>
+
+<ParamField path="sourceText" type="string" required>
+  The original text snippet from the source that supports the content.
+  
+  Direct quote or paraphrase from the source material.
+</ParamField>
+
+<ParamField path="source" type="string" required>
+  The URL of the source document.
+  
+  Note: For user-generated thesis nodes, may be a placeholder like `https://user-input.local/query`.
+</ParamField>
+
+<ParamField path="fallacies" type="string[]" required>
+  An array of logical fallacies identified in this specific argument node.
+  
+  Examples: `["Ad Hominem", "Straw Man"]` or `[]` if none detected.
+</ParamField>
+
+<ParamField path="logicalRole" type="string" required>
+  A concise statement explaining the node's function in the overall argument.
+  
+  Examples:
+  - "Primary legal basis for the thesis"
+  - "Economic counterargument"
+  - "Statistical evidence supporting Claim 2"
+</ParamField>
+
+## Example
+
+```json
+{
+  "id": "1",
+  "parentId": null,
+  "type": "thesis",
+  "side": "for",
+  "content": "Should governments implement carbon taxes?",
+  "sourceText": "User query: carbon tax policy",
+  "source": "https://user-input.local/query",
+  "fallacies": [],
+  "logicalRole": "Central debate question"
+}
+```
+
+```json
+{
+  "id": "2",
+  "parentId": "1",
+  "type": "claim",
+  "side": "for",
+  "content": "Carbon taxes reduce emissions by making pollution expensive",
+  "sourceText": "Studies show carbon pricing mechanisms have led to a 15% reduction in emissions in countries that implemented them.",
+  "source": "https://example.com/carbon-tax-study",
+  "fallacies": [],
+  "logicalRole": "Primary economic argument for carbon taxes"
+}
+```
+
+```json
+{
+  "id": "3",
+  "parentId": "1",
+  "type": "counterclaim",
+  "side": "against",
+  "content": "Carbon taxes harm economic growth and hurt working families",
+  "sourceText": "The carbon tax will destroy our economy and make everyone poor. If you support it, you hate working people.",
+  "source": "https://example.com/anti-carbon-tax",
+  "fallacies": ["Appeal to Emotion", "Ad Hominem"],
+  "logicalRole": "Economic opposition to carbon taxes with emotional appeal"
+}
+```
+
+## Tree Structure
+
+Nodes form a tree through the `parentId` relationship:
+
+```
+Thesis (id: "1", parentId: null)
+├── Claim (id: "2", parentId: "1")
+│   ├── Evidence (id: "2.1", parentId: "2")
+│   └── Evidence (id: "2.2", parentId: "2")
+└── Counterclaim (id: "3", parentId: "1")
+    └── Evidence (id: "3.1", parentId: "3")
+```
+
+## Validation Rules
+
+- Root nodes (thesis) must have `parentId: null`
+- All other nodes must reference a valid parent ID
+- `type` must be one of: thesis, claim, counterclaim, evidence
+- `side` must be either "for" or "against"
+- `source` is validated as a string (URL validation removed to prevent errors with placeholder values)
+- `fallacies` array can be empty but must be present
+
+## Usage in Flows
+
+The schema is used in:
+
+- **Generate Blueprint**: Creates array of ArgumentNode objects
+- **Visualization**: Renders nodes in various graph layouts
+- **Fallacy Detection**: Populates the `fallacies` field
+- **Source Tracking**: Links arguments back to original sources
+
+## Related
+
+- [Blueprint Output Schema](/api/schemas/blueprint-output)
+- [Generate Blueprint Flow](/api/flows/generate-blueprint)
+- [Fallacy Detection Schema](/api/schemas/fallacy-detection)

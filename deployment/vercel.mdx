@@ -1,0 +1,203 @@
+---
+title: 'Deploy to Vercel'
+description: 'Step-by-step guide to deploying Argument Cartographer on Vercel'
+icon: 'cloud'
+---
+
+## Overview
+
+Argument Cartographer is optimized for deployment on **Vercel**, leveraging Next.js 15's server-side rendering capabilities and edge functions. This guide walks you through the complete deployment process.
+
+## Prerequisites
+
+Before deploying, ensure you have:
+
+- A GitHub account with your repository pushed
+- A Vercel account (free tier works)
+- All required API keys (see [Environment Variables](/deployment/environment-variables))
+- Firebase project configured (see [Firebase Setup](/deployment/firebase-setup))
+
+## Deployment Steps
+
+<Steps>
+  <Step title="Prepare Your Repository">
+    Ensure your code is pushed to GitHub:
+    
+    ```bash
+    git add .
+    git commit -m "Prepare for Vercel deployment"
+    git push origin main
+    ```
+    
+    <Note>
+      The project uses TypeScript with `ignoreBuildErrors: true` in `next.config.ts`. While this allows flexible development, consider fixing type errors before production deployment.
+    </Note>
+  </Step>
+
+  <Step title="Import Project to Vercel">
+    1. Go to [vercel.com](https://vercel.com) and sign in
+    2. Click **"Add New Project"**
+    3. Import your GitHub repository
+    4. Vercel will automatically detect Next.js configuration
+    
+    <Info>
+      Vercel automatically configures:
+      - Build command: `npm run build` (or `NODE_ENV=production next build`)
+      - Output directory: `.next`
+      - Install command: `npm install`
+      - Development command: `npm run dev`
+    </Info>
+  </Step>
+
+  <Step title="Configure Environment Variables">
+    In the Vercel project settings, add all required environment variables:
+    
+    **AI Configuration:**
+    - `GOOGLE_GENAI_API_KEY` - Your Google Gemini API key
+    
+    **External Tools:**
+    - `FIRECRAWL_API_KEY` - Firecrawl API for web scraping
+    - `TWITTER_BEARER_TOKEN` - Twitter API v2 bearer token
+    
+    **Firebase Client Config (NEXT_PUBLIC_*):**
+    - `NEXT_PUBLIC_FIREBASE_API_KEY`
+    - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+    - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+    - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+    - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+    - `NEXT_PUBLIC_FIREBASE_APP_ID`
+    
+    **Firebase Admin Config:**
+    - `SERVICE_ACCOUNT_PROJECT_ID`
+    - `SERVICE_ACCOUNT_CLIENT_EMAIL`
+    - `SERVICE_ACCOUNT_PRIVATE_KEY`
+    
+    See the complete guide: [Environment Variables](/deployment/environment-variables)
+  </Step>
+
+  <Step title="Deploy">
+    Click **"Deploy"** and Vercel will:
+    
+    1. Install dependencies (`npm install`)
+    2. Run the build process (`next build`)
+    3. Deploy to edge network
+    4. Provide a production URL
+    
+    <Warning>
+      First deployment may take 2-3 minutes. Subsequent deployments are faster due to caching.
+    </Warning>
+  </Step>
+
+  <Step title="Verify Deployment">
+    After deployment completes:
+    
+    1. Visit your production URL
+    2. Test authentication flow
+    3. Create a test argument analysis
+    4. Verify AI flows are working
+    5. Check Firestore data persistence
+    
+    <Note>
+      If you encounter issues, check the [Troubleshooting](/troubleshooting/common-issues) guide.
+    </Note>
+  </Step>
+</Steps>
+
+## Build Configuration
+
+The project uses Next.js 15 with the following configuration:
+
+```typescript next.config.ts
+const nextConfig: NextConfig = {
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+    ],
+  },
+};
+```
+
+## Automatic Deployments
+
+Vercel automatically deploys:
+
+- **Production**: Every push to `main` branch
+- **Preview**: Every pull request gets a unique preview URL
+- **Rollbacks**: Instant rollback to any previous deployment
+
+<Info>
+  Preview deployments are useful for testing changes before merging to production.
+</Info>
+
+## Custom Domain Setup
+
+<Steps>
+  <Step title="Add Domain in Vercel">
+    Go to **Project Settings** → **Domains** → **Add Domain**
+  </Step>
+
+  <Step title="Configure DNS">
+    Add the provided DNS records to your domain registrar:
+    - A record pointing to `76.76.21.21`
+    - CNAME for `www` pointing to `cname.vercel-dns.com`
+  </Step>
+
+  <Step title="Verify and Enable SSL">
+    Vercel automatically provisions SSL certificates via Let's Encrypt.
+  </Step>
+</Steps>
+
+## Performance Optimization
+
+Vercel provides:
+
+- **Edge Network**: Global CDN for static assets
+- **Automatic Caching**: Optimized caching for Next.js pages
+- **Image Optimization**: Automatic image resizing and WebP conversion
+- **Analytics**: Built-in performance monitoring (available in Pro plan)
+
+## Monitoring
+
+After deployment, monitor your application:
+
+1. **Vercel Dashboard**: View deployment logs and runtime logs
+2. **Firebase Console**: Monitor Firestore usage and authentication
+3. **API Usage**: Track Firecrawl, Twitter, and Google AI API credits
+
+<Warning>
+  Monitor API usage carefully to avoid unexpected charges. The application makes multiple external API calls per analysis.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="key" href="/deployment/environment-variables">
+    Complete reference for all configuration variables
+  </Card>
+  <Card title="Firebase Setup" icon="fire" href="/deployment/firebase-setup">
+    Configure Firebase Authentication and Firestore
+  </Card>
+  <Card title="Common Issues" icon="triangle-exclamation" href="/troubleshooting/common-issues">
+    Troubleshoot deployment problems
+  </Card>
+  <Card title="API Errors" icon="bug" href="/troubleshooting/api-errors">
+    Debug API integration issues
+  </Card>
+</CardGroup>

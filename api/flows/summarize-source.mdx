@@ -1,0 +1,108 @@
+---
+title: 'Summarize Source Text'
+description: 'Generate concise summaries of source text'
+icon: 'compress'
+---
+
+## Overview
+
+The `summarizeSourceText` flow takes a piece of source text and generates a concise, accurate summary of its content.
+
+This flow is useful for condensing long articles, documents, or research papers into digestible summaries.
+
+## Function Signature
+
+```typescript
+export async function summarizeSourceText(
+  input: SummarizeSourceTextInput
+): Promise<SummarizeSourceTextOutput>
+```
+
+**Source:** `src/ai/flows/summarize-source-text.ts:24`
+
+## Input Schema
+
+<ParamField path="sourceText" type="string" required>
+  The source text to summarize.
+</ParamField>
+
+### Input Type
+
+```typescript
+const SummarizeSourceTextInputSchema = z.object({
+  sourceText: z.string().describe('The source text to summarize.'),
+});
+
+type SummarizeSourceTextInput = z.infer<typeof SummarizeSourceTextInputSchema>;
+```
+
+## Output Schema
+
+<ResponseField name="summary" type="string" required>
+  A concise summary of the source text.
+</ResponseField>
+
+### Output Type
+
+```typescript
+const SummarizeSourceTextOutputSchema = z.object({
+  summary: z.string().describe('A concise summary of the source text.'),
+});
+
+type SummarizeSourceTextOutput = z.infer<typeof SummarizeSourceTextOutputSchema>;
+```
+
+## Example Usage
+
+```typescript
+import { summarizeSourceText } from '@/ai/flows/summarize-source-text';
+
+const longArticle = `
+  [... several paragraphs of text ...]
+`;
+
+const result = await summarizeSourceText({
+  sourceText: longArticle
+});
+
+console.log(result.summary);
+// Output: A concise 2-3 sentence summary of the article
+```
+
+## Use Cases
+
+- **Article Condensation**: Summarize news articles or blog posts
+- **Research Papers**: Extract key findings from academic papers
+- **Document Analysis**: Generate executive summaries of reports
+- **Context Building**: Create brief overviews for argument nodes
+- **User Interface**: Display previews of long source content
+
+## Implementation Details
+
+The flow uses a simple, focused prompt optimized for summarization:
+
+**Prompt Template** (from `src/ai/flows/summarize-source-text.ts:32`):
+
+```
+Summarize the following text in a concise manner:
+
+{sourceText}
+```
+
+The AI model is instructed to:
+- Extract the main points and key information
+- Preserve factual accuracy
+- Maintain neutrality and objectivity
+- Present information in a clear, readable format
+
+## Tips for Best Results
+
+- Works best with coherent text between 100-10,000 words
+- Ensure source text is in English for optimal results
+- For very long documents, consider chunking and summarizing sections
+- The summary length scales with input length (typically 10-20% of original)
+
+## Related
+
+- [Generate Blueprint Flow](/api/flows/generate-blueprint) - uses summarization internally
+- [Web Scraper Tool](/api/tools/web-scraper) - provides source text for summarization

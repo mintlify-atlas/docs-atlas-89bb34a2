@@ -1,0 +1,471 @@
+---
+title: 'Firebase Setup'
+description: 'Configure Firebase Authentication and Firestore for Argument Cartographer'
+icon: 'fire'
+---
+
+## Overview
+
+Argument Cartographer uses Firebase for authentication and data persistence. This guide walks you through setting up Firebase with the strict security model implemented in the application.
+
+## Create Firebase Project
+
+<Steps>
+  <Step title="Create New Project">
+    1. Go to [Firebase Console](https://console.firebase.google.com/)
+    2. Click **"Add project"**
+    3. Enter project name (e.g., "argument-cartographer")
+    4. Enable Google Analytics (optional)
+    5. Click **"Create project"**
+  </Step>
+
+  <Step title="Register Web App">
+    1. In Firebase Console, click **"Add app"** → **Web**
+    2. Register app nickname (e.g., "Argument Cartographer Web")
+    3. Check **"Also set up Firebase Hosting"** (optional)
+    4. Click **"Register app"**
+    5. Copy the Firebase configuration values
+  </Step>
+
+  <Step title="Get Configuration Values">
+    Copy these values to your `.env` file:
+    
+    ```javascript
+    const firebaseConfig = {
+      apiKey: "AIzaSy...",           // → NEXT_PUBLIC_FIREBASE_API_KEY
+      authDomain: "project.firebaseapp.com",  // → NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+      projectId: "your-project-id",   // → NEXT_PUBLIC_FIREBASE_PROJECT_ID
+      storageBucket: "project.appspot.com",   // → NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+      messagingSenderId: "123456",    // → NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+      appId: "1:123:web:abc",         // → NEXT_PUBLIC_FIREBASE_APP_ID
+    };
+    ```
+  </Step>
+</Steps>
+
+## Configure Firebase Authentication
+
+<Steps>
+  <Step title="Enable Authentication">
+    In Firebase Console:
+    1. Go to **Build** → **Authentication**
+    2. Click **"Get started"**
+  </Step>
+
+  <Step title="Enable Sign-in Methods">
+    Enable the authentication providers you want to support:
+    
+    **Recommended providers:**
+    - **Email/Password**: Basic authentication
+    - **Google**: OAuth sign-in
+    - **Anonymous**: Guest access (optional)
+    
+    <Info>
+      The application's security rules work with any Firebase authentication provider.
+    </Info>
+  </Step>
+
+  <Step title="Configure Authorized Domains">
+    Add your domains to authorized list:
+    1. Go to **Authentication** → **Settings** → **Authorized domains**
+    2. Add your domains:
+       - `localhost` (for development)
+       - Your Vercel domain (e.g., `your-app.vercel.app`)
+       - Custom domain (if applicable)
+  </Step>
+</Steps>
+
+## Set Up Firestore Database
+
+<Steps>
+  <Step title="Create Firestore Database">
+    1. Go to **Build** → **Firestore Database**
+    2. Click **"Create database"**
+    3. Select location (choose closest to your users)
+    4. Start in **Production mode** (we'll add security rules next)
+  </Step>
+
+  <Step title="Deploy Security Rules">
+    The application uses a **strict user-ownership model**. Deploy these security rules:
+    
+    <Warning>
+      The security rules enforce that all data is private to individual users. Never modify the ownership checks without careful review.
+    </Warning>
+    
+    Navigate to **Firestore Database** → **Rules** and paste the following:
+    
+    ```javascript firestore.rules
+    rules_version = '2';
+    service cloud.firestore {
+      match /databases/{database}/documents {
+        
+        // Helper Functions
+        function isSignedIn() {
+          return request.auth != null;
+        }
+        
+        function isOwner(userId) {
+          return isSignedIn() && request.auth.uid == userId;
+        }
+        
+        function isExistingOwner(userId) {
+          return isOwner(userId) && resource != null;
+        }
+        
+        function isCreatingOwnProfile(userId) {
+          return request.resource.data.id == userId;
+        }
+        
+        function isCreatingOwnSubcollectionDoc(userId) {
+          return request.resource.data.userId == userId;
+        }
+        
+        function isUserIdImmutable() {
+          return request.resource.data.id == resource.data.id;
+        }
+        
+        function isOwnerIdImmutable() {
+          return request.resource.data.userId == resource.data.userId;
+        }
+        
+        // User Profiles
+        match /users/{userId} {
+          allow get: if isOwner(userId);
+          allow list: if false;  // Prevent scraping
+          allow create: if isOwner(userId) && isCreatingOwnProfile(userId);
+          allow update: if isExistingOwner(userId) && isUserIdImmutable();
+          allow delete: if isExistingOwner(userId);
+        }
+        
+        // Argument Maps
+        match /users/{userId}/argumentMaps/{argumentMapId} {
+          allow get: if isOwner(userId);
+          allow list: if isOwner(userId);
+          allow create: if isOwner(userId) && isCreatingOwnSubcollectionDoc(userId);
+          allow update: if isExistingOwner(userId) && isOwnerIdImmutable();
+          allow delete: if isExistingOwner(userId);
+        }
+        
+        // Sources
+        match /users/{userId}/sources/{sourceId} {
+          allow get: if isOwner(userId);
+          allow list: if isOwner(userId);
+          allow create: if isOwner(userId) && isCreatingOwnSubcollectionDoc(userId);
+          allow update: if isExistingOwner(userId) && isOwnerIdImmutable();
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+    }
+    ```
+    
+    Click **"Publish"** to deploy the rules.
+  </Step>
+
+  <Step title="Verify Security Rules">
+    Test the rules using Firebase's Rules Playground:
+    
+    1. Go to **Rules** tab → **Rules Playground**
+    2. Test scenarios:
+       - Authenticated user reading own data: ✅ Allow
+       - Authenticated user reading other user's data: ❌ Deny
+       - Unauthenticated read: ❌ Deny
+       - List all users: ❌ Deny (privacy protection)
+  </Step>
+</Steps>
+
+## Security Model Deep Dive
+
+### Core Philosophy
+
+The application implements a **strict user-ownership model** based on these principles:
+
+<AccordionGroup>
+  <Accordion title="Default Deny" icon="shield">
+    All operations are denied unless explicitly allowed. There is no public data.
+  </Accordion>
+  
+  <Accordion title="Path-Based Authorization" icon="route">
+    Ownership is determined by the `{userId}` wildcard in the document path, avoiding costly database reads:
+    
+    ```
+    /users/{userId}/argumentMaps/{mapId}
+            ↑
+            └─ Must match request.auth.uid
+    ```
+  </Accordion>
+  
+  <Accordion title="Denormalized User IDs" icon="database">
+    Documents include a `userId` field that's validated on creation and immutable:
+    
+    ```typescript
+    function isCreatingOwnSubcollectionDoc(userId) {
+      return request.resource.data.userId == userId;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="No User Scraping" icon="user-lock">
+    Listing the `/users` collection is explicitly forbidden:
+    
+    ```javascript
+    match /users/{userId} {
+      allow list: if false;  // Protect user privacy
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Data Structure
+
+All user data is organized hierarchically:
+
+```
+/users/{userId}                          ← User profile
+├── /argumentMaps/{mapId}                ← Analysis results
+│   ├── blueprint: ArgumentNode[]        ← Structured arguments
+│   ├── summary: string                  ← Analysis summary
+│   ├── credibilityScore: number         ← Quality rating
+│   └── fallacies: DetectedFallacy[]     ← Logical fallacies
+└── /sources/{sourceId}                  ← Scraped sources
+    ├── url: string                      ← Source URL
+    └── content: string                  ← Extracted text
+```
+
+### Permission Error Handling
+
+The application includes custom error handling for permission denials:
+
+```typescript
+// From firebase/errors.ts
+export class FirestorePermissionError extends Error {
+  public readonly request: SecurityRuleRequest;
+  
+  constructor(context: SecurityRuleContext) {
+    const requestObject = buildRequestObject(context);
+    super(buildErrorMessage(requestObject));
+    this.name = 'FirebaseError';
+    this.request = requestObject;
+  }
+}
+```
+
+This provides detailed debugging information when security rules reject requests.
+
+## Generate Service Account Key
+
+For server-side operations (admin SDK), generate a service account key:
+
+<Steps>
+  <Step title="Navigate to Service Accounts">
+    In Firebase Console:
+    1. Go to **Project Settings** (gear icon)
+    2. Select **Service accounts** tab
+  </Step>
+
+  <Step title="Generate Private Key">
+    1. Click **"Generate new private key"**
+    2. Click **"Generate key"** in the confirmation dialog
+    3. Save the JSON file securely (never commit to version control)
+  </Step>
+
+  <Step title="Extract Values for Environment Variables">
+    Open the downloaded JSON file and extract:
+    
+    ```json service-account.json
+    {
+      "project_id": "your-project-id",           // → SERVICE_ACCOUNT_PROJECT_ID
+      "private_key": "-----BEGIN PRIVATE KEY-----\n...",  // → SERVICE_ACCOUNT_PRIVATE_KEY
+      "client_email": "firebase-adminsdk@..."    // → SERVICE_ACCOUNT_CLIENT_EMAIL
+    }
+    ```
+    
+    <Warning>
+      When adding `SERVICE_ACCOUNT_PRIVATE_KEY` to Vercel:
+      1. Include the entire key with quotes
+      2. Newlines should be `\n` (escaped)
+      3. Format: `"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"`
+    </Warning>
+  </Step>
+</Steps>
+
+## Configure Firestore Indexes
+
+For optimal query performance, create composite indexes:
+
+<Steps>
+  <Step title="Navigate to Indexes">
+    Go to **Firestore Database** → **Indexes**
+  </Step>
+
+  <Step title="Add Composite Indexes">
+    Create indexes for common query patterns:
+    
+    **Argument Maps by User and Date:**
+    - Collection: `argumentMaps`
+    - Fields:
+      - `userId` (Ascending)
+      - `createdAt` (Descending)
+    - Query scope: Collection
+    
+    <Info>
+      Firebase will automatically prompt you to create indexes when it detects missing ones in your queries.
+    </Info>
+  </Step>
+</Steps>
+
+## Testing Firebase Integration
+
+Verify your Firebase setup:
+
+```typescript
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+
+// Test authentication
+const auth = getAuth();
+const userCredential = await signInAnonymously(auth);
+console.log('✅ Authentication successful:', userCredential.user.uid);
+
+// Test Firestore write
+const db = getFirestore();
+const testDoc = doc(db, `users/${userCredential.user.uid}/test/doc1`);
+await setDoc(testDoc, { test: true, userId: userCredential.user.uid });
+console.log('✅ Firestore write successful');
+
+// Test Firestore read
+const snapshot = await getDoc(testDoc);
+console.log('✅ Firestore read successful:', snapshot.data());
+```
+
+## Monitoring and Maintenance
+
+<AccordionGroup>
+  <Accordion title="Monitor Usage" icon="chart-line">
+    **Firebase Console** → **Usage and billing**
+    
+    Track:
+    - Firestore reads/writes/deletes
+    - Authentication sign-ins
+    - Storage usage
+    - Network egress
+    
+    <Note>
+      Firebase free tier includes:
+      - 50K reads/day
+      - 20K writes/day
+      - 1GB storage
+    </Note>
+  </Accordion>
+  
+  <Accordion title="Backup Strategy" icon="database">
+    **Automated backups:**
+    1. Go to **Firestore Database** → **Data** → **Backups**
+    2. Enable **Automatic backups**
+    3. Configure retention period (7-365 days)
+    
+    **Manual exports:**
+    ```bash
+    gcloud firestore export gs://your-bucket/backups/$(date +%Y%m%d)
+    ```
+  </Accordion>
+  
+  <Accordion title="Security Auditing" icon="shield-check">
+    Regularly review:
+    - **Authentication** → **Users** - Check for suspicious accounts
+    - **Firestore** → **Rules** - Review rule changes
+    - **Usage** → **Logs** - Monitor denied requests
+    
+    Set up alerts for:
+    - Unusual spike in denied requests (possible attack)
+    - High authentication failures
+    - Quota approaching limits
+  </Accordion>
+</AccordionGroup>
+
+## Upgrade to Blaze Plan
+
+For production deployments, consider upgrading to the Blaze (pay-as-you-go) plan:
+
+**Benefits:**
+- Increased quotas for high-traffic apps
+- Access to Firebase Extensions
+- Cloud Functions integration
+- Better SLA and support
+
+**When to upgrade:**
+- Exceeding free tier limits
+- Need cloud functions for background processing
+- Production app with revenue
+
+<Warning>
+  Set up billing alerts to avoid unexpected charges. Each argument analysis makes multiple API calls and Firestore operations.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Permission denied errors">
+    **Symptoms**: `Missing or insufficient permissions` error
+    
+    **Solutions**:
+    1. Verify user is authenticated (`request.auth != null`)
+    2. Check `userId` in path matches `request.auth.uid`
+    3. Ensure document has required `userId` field
+    4. Review security rules deployment status
+    
+    Use the custom error handler for detailed debugging:
+    ```typescript
+    // The app logs the full request context on permission errors
+    console.error(error.request); // Contains auth, path, method
+    ```
+  </Accordion>
+  
+  <Accordion title="Service account authentication failing">
+    **Check**:
+    - Private key format (escaped newlines: `\n`)
+    - Key is wrapped in quotes
+    - Client email is correct
+    - Project ID matches
+    - Service account has required permissions
+    
+    Test with:
+    ```typescript
+    import admin from 'firebase-admin';
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.SERVICE_ACCOUNT_PROJECT_ID,
+        clientEmail: process.env.SERVICE_ACCOUNT_CLIENT_EMAIL,
+        privateKey: process.env.SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
+    });
+    ```
+  </Accordion>
+  
+  <Accordion title="Indexes missing">
+    **Symptoms**: Query fails with "index required" error
+    
+    **Solution**:
+    1. Click the link in the error message
+    2. Firebase will create the index automatically
+    3. Wait 2-5 minutes for index to build
+    4. Retry the query
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Environment Variables" icon="key" href="/deployment/environment-variables">
+    Configure all required environment variables
+  </Card>
+  <Card title="Deploy to Vercel" icon="cloud" href="/deployment/vercel">
+    Deploy your application to production
+  </Card>
+  <Card title="Common Issues" icon="triangle-exclamation" href="/troubleshooting/common-issues">
+    Troubleshoot deployment problems
+  </Card>
+  <Card title="Performance" icon="gauge" href="/troubleshooting/performance">
+    Optimize Firebase performance
+  </Card>
+</CardGroup>
